@@ -1,0 +1,250 @@
+﻿@page "/explore-events"
+@rendermode InteractiveServer
+@using EventRegistration.Data
+@using EventRegistration.Domain
+@using Microsoft.EntityFrameworkCore
+@inject EventRegistrationContext DbContext
+@inject NavigationManager Navigation
+
+<PageTitle>Explore Events - Eventora</PageTitle>
+
+<link href="/ExploreEvents.css" rel="stylesheet" />
+
+<div class="explore-events-page">
+    <!-- Page Header -->
+    <section class="events-page-header">
+        <div class="container">
+            <h1 class="events-page-title">@GetCategoryTitle()</h1>
+            <p class="events-page-subtitle">@GetCategoryDescription()</p>
+        </div>
+    </section>
+
+    <!-- Category Filter Buttons -->
+    <section class="events-filter-section">
+        <div class="container">
+            <div class="events-filter-buttons">
+                <button class="events-filter-btn @(string.IsNullOrEmpty(SelectedCategory) ? "active" : "")"
+                        @onclick="@(() => FilterByCategory(null))">
+                    All Events
+                </button>
+                <button class="events-filter-btn @(SelectedCategory == "Music" ? "active" : "")"
+                        @onclick="@(() => FilterByCategory("Music"))">
+                    🎵 Music & Concerts
+                </button>
+                <button class="events-filter-btn @(SelectedCategory == "Educational" ? "active" : "")"
+                        @onclick="@(() => FilterByCategory("Educational"))">
+                    📚 Educational
+                </button>
+                <button class="events-filter-btn @(SelectedCategory == "Arts" ? "active" : "")"
+                        @onclick="@(() => FilterByCategory("Arts"))">
+                    🎨 Arts & Culture
+                </button>
+                <button class="events-filter-btn @(SelectedCategory == "Professional" ? "active" : "")"
+                        @onclick="@(() => FilterByCategory("Professional"))">
+                    💼 Professional
+                </button>
+                <button class="events-filter-btn @(SelectedCategory == "Sports" ? "active" : "")"
+                        @onclick="@(() => FilterByCategory("Sports"))">
+                    ⚽ Sports
+                </button>
+                <button class="events-filter-btn @(SelectedCategory == "Entertainment" ? "active" : "")"
+                        @onclick="@(() => FilterByCategory("Entertainment"))">
+                    🎬 Entertainment
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Events Grid -->
+    <section class="events-list-section">
+        <div class="container">
+            @if (isLoading)
+            {
+                <div class="events-loading-spinner">
+                    <p>Loading events...</p>
+                </div>
+            }
+            else if (events != null && events.Any())
+            {
+                <div class="events-results-grid">
+                    @foreach (var evt in events)
+                    {
+                        <div class="event-result-card">
+                            <div class="event-result-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <div class="event-result-icon">@GetCategoryIcon(evt.Category)</div>
+                                <span class="event-result-category-badge">@evt.Category</span>
+                            </div>
+
+                            <div class="event-result-content">
+                                <h3 class="event-result-title">@evt.Title</h3>
+
+                                <div class="event-result-details">
+                                    <div class="event-result-detail-item">
+                                        <span class="event-result-icon-small">📅</span>
+                                        <span class="event-result-text">@evt.EventDate.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                    <div class="event-result-detail-item">
+                                        <span class="event-result-icon-small">📍</span>
+                                        <span class="event-result-text">@evt.Location</span>
+                                    </div>
+                                </div>
+
+                                <div class="event-result-price">
+                                    @if (evt.Tickets != null && evt.Tickets.Any())
+                                    {
+                                        var minPrice = evt.Tickets.Min(t => t.Price);
+                                        if (minPrice == 0)
+                                        {
+                                            <span class="event-result-price-value">Free</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="event-result-price-value">$@minPrice.ToString("F2")</span>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="event-result-price-value">Price TBA</span>
+                                    }
+                                </div>
+
+                                <button class="event-result-register-btn" @onclick="@(() => ViewEventDetails(evt.Id))">
+                                    View Details & Register
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="events-no-results">
+                    <div class="events-no-results-icon">📅</div>
+                    <h3>No events found</h3>
+                    <p>There are currently no events in this category.</p>
+                    <button class="events-no-results-btn" @onclick="@(() => FilterByCategory(null))">
+                        View All Events
+                    </button>
+                </div>
+            }
+        </div>
+    </section>
+</div>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "category")]
+    public string? SelectedCategory { get; set; }
+
+    private List<Event> events = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEvents();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadEvents();
+    }
+
+    private async Task LoadEvents()
+    {
+        isLoading = true;
+
+        try
+        {
+            var query = DbContext.Event
+                .Include(e => e.Tickets)  // This now works because Event has Tickets property
+                .AsQueryable();
+
+            // Filter by category if specified
+            if (!string.IsNullOrEmpty(SelectedCategory))
+            {
+                query = query.Where(e => e.Category == SelectedCategory);
+            }
+
+            events = await query
+                .OrderBy(e => e.EventDate)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading events: {ex.Message}");
+            events = new List<Event>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void FilterByCategory(string? category)
+    {
+        if (category == null)
+        {
+            Navigation.NavigateTo("/explore-events");
+        }
+        else
+        {
+            Navigation.NavigateTo($"/explore-events?category={category}");
+        }
+    }
+
+    private void ViewEventDetails(int eventId)
+    {
+        Navigation.NavigateTo($"/event-details/{eventId}");
+    }
+
+    private string GetCategoryTitle()
+    {
+        if (string.IsNullOrEmpty(SelectedCategory))
+            return "All Events";
+
+        return SelectedCategory switch
+        {
+            "Music" => "Music & Concerts",
+            "Educational" => "Educational Events",
+            "Arts" => "Arts & Culture",
+            "Professional" => "Professional Events",
+            "Sports" => "Sports Events",
+            "Entertainment" => "Entertainment",
+            _ => SelectedCategory
+        };
+    }
+
+    private string GetCategoryDescription()
+    {
+        if (string.IsNullOrEmpty(SelectedCategory))
+            return "Browse all upcoming events";
+
+        return SelectedCategory switch
+        {
+            "Music" => "Live performances, festivals, and music events",
+            "Educational" => "Webinars, workshops, and learning sessions",
+            "Arts" => "Exhibitions, theater, and cultural events",
+            "Professional" => "Networking, conferences, and career events",
+            "Sports" => "Athletic events, tournaments, and fitness activities",
+            "Entertainment" => "Movies, shows, and entertainment experiences",
+            _ => "Browse upcoming events"
+        };
+    }
+
+    private string GetCategoryIcon(string? category)
+    {
+        if (string.IsNullOrEmpty(category))
+            return "📅";
+
+        return category switch
+        {
+            "Music" => "🎵",
+            "Educational" => "💻",
+            "Arts" => "🎭",
+            "Professional" => "💼",
+            "Sports" => "🏃",
+            "Entertainment" => "🎬",
+            _ => "📅"
+        };
+    }
+}

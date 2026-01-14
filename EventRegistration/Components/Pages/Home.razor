@@ -1,4 +1,6 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@inject NavigationManager Navigation     
 
 <PageTitle>Eventora - Home</PageTitle>
 
@@ -14,22 +16,22 @@
     <p class="section-subtitle">Find the perfect event for you from various categories</p>
 
     <div class="category-grid">
-        <div class="category-card">
+        <div class="category-card" @onclick="@(() => NavigateToCategory("Music"))">     
             <div class="category-icon">🎵</div>
             <h3>Music & Concerts</h3>
             <p>Live performances, festivals, and music events</p>
         </div>
-        <div class="category-card">
+        <div class="category-card" @onclick="@(() => NavigateToCategory("Educational"))">     
             <div class="category-icon">📚</div>
             <h3>Educational</h3>
             <p>Webinars, workshops, and learning sessions</p>
         </div>
-        <div class="category-card">
+        <div class="category-card" @onclick="@(() => NavigateToCategory("Arts"))">     
             <div class="category-icon">🎨</div>
             <h3>Arts & Culture</h3>
             <p>Exhibitions, theater, and cultural events</p>
         </div>
-        <div class="category-card">
+        <div class="category-card" @onclick="@(() => NavigateToCategory("Professional"))">     
             <div class="category-icon">💼</div>
             <h3>Professional</h3>
             <p>Networking, conferences, and career events</p>
@@ -129,3 +131,10 @@
 <footer class="footer">
     <p>&copy; 2026 Eventora. All rights reserved. | Making events accessible for everyone</p>
 </footer>
+
+@code {     
+    private void NavigateToCategory(string category)
+    {
+        Navigation.NavigateTo($"/explore-events?category={category}");
+    }
+}
