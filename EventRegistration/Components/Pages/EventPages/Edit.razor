@@ -1,0 +1,107 @@
+﻿@page "/events/edit"
+@using Microsoft.EntityFrameworkCore
+@using EventRegistration.Domain
+@inject IDbContextFactory<EventRegistration.Data.EventRegistrationContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Event</h2>
+<hr />
+
+@if (selectedEvent is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm Model="@selectedEvent" OnValidSubmit="@UpdateEvent">
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert" />
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title:</label>
+                    <InputText id="title" @bind-Value="selectedEvent.Title" class="form-control" />
+                    <ValidationMessage For="() => selectedEvent.Title" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="type" class="form-label">Type:</label>
+                    <InputText id="type" @bind-Value="selectedEvent.Type" class="form-control" />
+                    <ValidationMessage For="() => selectedEvent.Type" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="eventdate" class="form-label">EventDate:</label>
+                    <InputDate id="eventdate" @bind-Value="selectedEvent.EventDate" class="form-control" />
+                    <ValidationMessage For="() => selectedEvent.EventDate" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="location" class="form-label">Location:</label>
+                    <InputText id="location" @bind-Value="selectedEvent.Location" class="form-control" />
+                    <ValidationMessage For="() => selectedEvent.Location" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="totalcapacity" class="form-label">TotalCapacity:</label>
+                    <InputNumber id="totalcapacity" @bind-Value="selectedEvent.TotalCapacity" class="form-control" />
+                    <ValidationMessage For="() => selectedEvent.TotalCapacity" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="createdby" class="form-label">CreatedBy:</label>
+                    <InputText id="createdby" @bind-Value="selectedEvent.CreatedBy" class="form-control" />
+                    <ValidationMessage For="() => selectedEvent.CreatedBy" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="updatedby" class="form-label">UpdatedBy:</label>
+                    <InputText id="updatedby" @bind-Value="selectedEvent.UpdatedBy" class="form-control" />
+                    <ValidationMessage For="() => selectedEvent.UpdatedBy" class="text-danger" />
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/events">Back to List</a>
+</div>
+
+@code {
+    private Event? selectedEvent;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        selectedEvent = await context.Event.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (selectedEvent is null)
+        {
+            NavigationManager.NavigateTo("/events");
+        }
+    }
+
+    private async Task UpdateEvent()
+    {
+        if (selectedEvent is null) return;
+
+        using var context = DbFactory.CreateDbContext();
+
+        // attach & mark modified
+        context.Attach(selectedEvent).State = EntityState.Modified;
+        await context.SaveChangesAsync();
+
+        NavigationManager.NavigateTo("/events");
+    }
+}

@@ -4,9 +4,8 @@
     {
         public string? Title { get; set; }
         public string? Type { get; set; }
-        public DateTime DateTime { get; set; }
+        public DateTime EventDate { get; set; } 
         public string? Location { get; set; }
         public int TotalCapacity { get; set; }
-
     }
 }

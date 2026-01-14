@@ -1,0 +1,87 @@
+﻿@page "/events/create"
+@using Microsoft.EntityFrameworkCore
+@using EventRegistration.Domain
+@inject IDbContextFactory<EventRegistration.Data.EventRegistrationContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Event</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <EditForm Model="@newEvent" OnValidSubmit="@AddEvent">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+
+            <div class="mb-3">
+                <label for="title" class="form-label">Title:</label>
+                <InputText id="title" @bind-Value="newEvent.Title" class="form-control" />
+                <ValidationMessage For="() => newEvent.Title" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="type" class="form-label">Type:</label>
+                <InputText id="type" @bind-Value="newEvent.Type" class="form-control" />
+                <ValidationMessage For="() => newEvent.Type" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="eventdate" class="form-label">EventDate:</label>
+                <InputDate id="eventdate" @bind-Value="newEvent.EventDate" class="form-control" />
+                <ValidationMessage For="() => newEvent.EventDate" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="location" class="form-label">Location:</label>
+                <InputText id="location" @bind-Value="newEvent.Location" class="form-control" />
+                <ValidationMessage For="() => newEvent.Location" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="totalcapacity" class="form-label">TotalCapacity:</label>
+                <InputNumber id="totalcapacity" @bind-Value="newEvent.TotalCapacity" class="form-control" />
+                <ValidationMessage For="() => newEvent.TotalCapacity" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="createdby" class="form-label">CreatedBy:</label>
+                <InputText id="createdby" @bind-Value="newEvent.CreatedBy" class="form-control" />
+                <ValidationMessage For="() => newEvent.CreatedBy" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="updatedby" class="form-label">UpdatedBy:</label>
+                <InputText id="updatedby" @bind-Value="newEvent.UpdatedBy" class="form-control" />
+                <ValidationMessage For="() => newEvent.UpdatedBy" class="text-danger" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/events">Back to List</a>
+</div>
+
+@code {
+    private Event newEvent = new();
+
+    private async Task AddEvent()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        // Optional: set timestamps automatically (recommended)
+        // newEvent.DateCreated = DateTime.Now;
+        // newEvent.DateUpdated = DateTime.Now;
+
+        context.Event.Add(newEvent);
+        await context.SaveChangesAsync();
+
+        NavigationManager.NavigateTo("/events");
+    }
+}

@@ -1,0 +1,119 @@
+﻿@page "/registrations/edit"
+@using Microsoft.EntityFrameworkCore
+@using EventRegistration.Domain
+@inject IDbContextFactory<EventRegistration.Data.EventRegistrationContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Registration</h2>
+<hr />
+@if (Registration is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Registration" OnValidSubmit="UpdateRegistration" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Registration.Id" value="@Registration.Id" />
+                <div class="mb-3">
+                    <label for="registrationdate" class="form-label">RegistrationDate:</label>
+                    <InputDate id="registrationdate" @bind-Value="Registration.RegistrationDate" class="form-control" />
+                    <ValidationMessage For="() => Registration.RegistrationDate" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="eventid" class="form-label">EventId:</label>
+                    <InputNumber id="eventid" @bind-Value="Registration.EventId" class="form-control" />
+                    <ValidationMessage For="() => Registration.EventId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="ticketid" class="form-label">TicketId:</label>
+                    <InputNumber id="ticketid" @bind-Value="Registration.TicketId" class="form-control" />
+                    <ValidationMessage For="() => Registration.TicketId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="datecreated" class="form-label">DateCreated:</label>
+                    <InputDate id="datecreated" @bind-Value="Registration.DateCreated" class="form-control" />
+                    <ValidationMessage For="() => Registration.DateCreated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="dateupdated" class="form-label">DateUpdated:</label>
+                    <InputDate id="dateupdated" @bind-Value="Registration.DateUpdated" class="form-control" />
+                    <ValidationMessage For="() => Registration.DateUpdated" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="createdby" class="form-label">CreatedBy:</label>
+                    <InputText id="createdby" @bind-Value="Registration.CreatedBy" class="form-control" />
+                    <ValidationMessage For="() => Registration.CreatedBy" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="updatedby" class="form-label">UpdatedBy:</label>
+                    <InputText id="updatedby" @bind-Value="Registration.UpdatedBy" class="form-control" />
+                    <ValidationMessage For="() => Registration.UpdatedBy" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/registrations">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Registration? Registration { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Registration ??= await context.Registration.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Registration is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateRegistration()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Registration!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!RegistrationExists(Registration!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/registrations");
+    }
+
+    private bool RegistrationExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Registration.Any(e => e.Id == id);
+    }
+}

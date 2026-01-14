@@ -1,0 +1,58 @@
+﻿@page "/registrations/details"
+@using Microsoft.EntityFrameworkCore
+@using EventRegistration.Domain
+@inject IDbContextFactory<EventRegistration.Data.EventRegistrationContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Registration</h2>
+    <hr />
+    @if (registration is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">RegistrationDate</dt>
+            <dd class="col-sm-10">@registration.RegistrationDate</dd>
+            <dt class="col-sm-2">EventId</dt>
+            <dd class="col-sm-10">@registration.EventId</dd>
+            <dt class="col-sm-2">TicketId</dt>
+            <dd class="col-sm-10">@registration.TicketId</dd>
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@registration.DateCreated</dd>
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@registration.DateUpdated</dd>
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@registration.CreatedBy</dd>
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@registration.UpdatedBy</dd>
+        </dl>
+        <div>
+            <a href="@($"/registrations/edit?id={registration.Id}")">Edit</a> |
+            <a href="@($"/registrations")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Registration? registration;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        registration = await context.Registration.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (registration is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

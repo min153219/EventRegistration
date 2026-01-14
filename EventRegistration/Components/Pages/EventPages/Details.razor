@@ -1,0 +1,76 @@
+﻿@page "/events/details"
+@using Microsoft.EntityFrameworkCore
+@using EventRegistration.Domain
+@inject IDbContextFactory<EventRegistration.Data.EventRegistrationContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Event</h2>
+    <hr />
+
+    @if (selectedEvent is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <dl class="row">
+            <dt class="col-sm-2">Title</dt>
+            <dd class="col-sm-10">@selectedEvent.Title</dd>
+
+            <dt class="col-sm-2">Type</dt>
+            <dd class="col-sm-10">@selectedEvent.Type</dd>
+
+            <dt class="col-sm-2">EventDate</dt>
+            <dd class="col-sm-10">@selectedEvent.EventDate</dd>
+
+            <dt class="col-sm-2">Location</dt>
+            <dd class="col-sm-10">@selectedEvent.Location</dd>
+
+            <dt class="col-sm-2">TotalCapacity</dt>
+            <dd class="col-sm-10">@selectedEvent.TotalCapacity</dd>
+
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@selectedEvent.DateCreated</dd>
+
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@selectedEvent.DateUpdated</dd>
+
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@selectedEvent.CreatedBy</dd>
+
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@selectedEvent.UpdatedBy</dd>
+        </dl>
+
+        <div>
+            <a href="@($"/events/edit?id={selectedEvent.Id}")">Edit</a> |
+            <a href="/events">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Event? selectedEvent;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        selectedEvent = await context.Event
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (selectedEvent is null)
+        {
+            // Change this to your actual NotFound route if you have one
+            NavigationManager.NavigateTo("/events");
+        }
+    }
+}

@@ -1,0 +1,79 @@
+﻿@page "/tickets/delete"
+@using Microsoft.EntityFrameworkCore
+@using EventRegistration.Domain
+@inject IDbContextFactory<EventRegistration.Data.EventRegistrationContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Ticket</h2>
+    <hr />
+    @if (ticket is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Price</dt>
+            <dd class="col-sm-10">@ticket.Price</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Type</dt>
+            <dd class="col-sm-10">@ticket.Type</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">EventId</dt>
+            <dd class="col-sm-10">@ticket.EventId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateCreated</dt>
+            <dd class="col-sm-10">@ticket.DateCreated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateUpdated</dt>
+            <dd class="col-sm-10">@ticket.DateUpdated</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CreatedBy</dt>
+            <dd class="col-sm-10">@ticket.CreatedBy</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">UpdatedBy</dt>
+            <dd class="col-sm-10">@ticket.UpdatedBy</dd>
+        </dl>
+        <EditForm method="post" Model="ticket" OnValidSubmit="DeleteTicket" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(ticket is null)">Delete</button> |
+            <a href="/tickets">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Ticket? ticket;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        ticket = await context.Ticket.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (ticket is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteTicket()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Ticket.Remove(ticket!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/tickets");
+    }
+}
