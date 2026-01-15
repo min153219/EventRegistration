@@ -4,6 +4,7 @@ using EventRegistration.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventRegistration.Migrations
 {
     [DbContext(typeof(EventRegistrationContext))]
-    partial class EventRegistrationContextModelSnapshot : ModelSnapshot
+    [Migration("20260115084758_createevents")]
+    partial class createevents
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -97,7 +100,7 @@ namespace EventRegistration.Migrations
                         {
                             Id = "1",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "1bc6edf4-86ed-42b7-9dc4-058e09b881fd",
+                            ConcurrencyStamp = "e05e686e-b235-4ab3-aec6-1b3d3a2379a4",
                             Email = "admin@localhost.com",
                             EmailConfirmed = true,
                             FirstName = "Admin",
@@ -105,9 +108,9 @@ namespace EventRegistration.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@LOCALHOST.COM",
                             NormalizedUserName = "ADMIN@LOCALHOST.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFHumjVqkmnLWrwmW2KoquBJVRnTELjK22D0KgbDB6pLmeoGnFxB5fY/kv9l0TXnig==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFw0KLVbFj68eZgj1DPPCTfcXvHHbsCXsJrh6zAWn1QxvHqhwzMlHionGJCqjo9BCg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "3511e9f7-b787-48ee-ba63-4dfd679c942c",
+                            SecurityStamp = "20676dbd-c9a7-475b-9dbd-95f744ce17e8",
                             TwoFactorEnabled = false,
                             UserName = "admin@localhost.com"
                         });
@@ -169,8 +172,8 @@ namespace EventRegistration.Migrations
                         {
                             Id = 1,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2026, 1, 15, 16, 52, 53, 488, DateTimeKind.Local).AddTicks(6782),
-                            DateUpdated = new DateTime(2026, 1, 15, 16, 52, 53, 488, DateTimeKind.Local).AddTicks(6796),
+                            DateCreated = new DateTime(2026, 1, 15, 16, 47, 56, 546, DateTimeKind.Local).AddTicks(4618),
+                            DateUpdated = new DateTime(2026, 1, 15, 16, 47, 56, 546, DateTimeKind.Local).AddTicks(4632),
                             EventDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsFeatured = false,
                             Location = "Temasek Polytechnic, Convention Centre",
@@ -227,8 +230,8 @@ namespace EventRegistration.Migrations
                             Amount = 0.00m,
                             CreatedBy = "System",
                             Currency = "SGD",
-                            DateCreated = new DateTime(2026, 1, 15, 16, 52, 53, 488, DateTimeKind.Local).AddTicks(7019),
-                            DateUpdated = new DateTime(2026, 1, 15, 16, 52, 53, 488, DateTimeKind.Local).AddTicks(7019),
+                            DateCreated = new DateTime(2026, 1, 15, 16, 47, 56, 546, DateTimeKind.Local).AddTicks(4936),
+                            DateUpdated = new DateTime(2026, 1, 15, 16, 47, 56, 546, DateTimeKind.Local).AddTicks(4937),
                             PaymentDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Free",
                             RegistrationId = 1,
@@ -274,8 +277,8 @@ namespace EventRegistration.Migrations
                         {
                             Id = 1,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2026, 1, 15, 16, 52, 53, 488, DateTimeKind.Local).AddTicks(7135),
-                            DateUpdated = new DateTime(2026, 1, 15, 16, 52, 53, 488, DateTimeKind.Local).AddTicks(7135),
+                            DateCreated = new DateTime(2026, 1, 15, 16, 47, 56, 546, DateTimeKind.Local).AddTicks(5077),
+                            DateUpdated = new DateTime(2026, 1, 15, 16, 47, 56, 546, DateTimeKind.Local).AddTicks(5078),
                             EventId = 1,
                             RegistrationDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TicketId = 1,
@@ -323,8 +326,8 @@ namespace EventRegistration.Migrations
                         {
                             Id = 1,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2026, 1, 15, 16, 52, 53, 488, DateTimeKind.Local).AddTicks(7232),
-                            DateUpdated = new DateTime(2026, 1, 15, 16, 52, 53, 488, DateTimeKind.Local).AddTicks(7232),
+                            DateCreated = new DateTime(2026, 1, 15, 16, 47, 56, 546, DateTimeKind.Local).AddTicks(5218),
+                            DateUpdated = new DateTime(2026, 1, 15, 16, 47, 56, 546, DateTimeKind.Local).AddTicks(5219),
                             EventId = 1,
                             Price = 0.00m,
                             Type = "Free Admission",
