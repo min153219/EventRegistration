@@ -19,7 +19,7 @@ else
 {
     <div class="row">
         <div class="col-md-4">
-            <EditForm Model="@selectedEvent" OnValidSubmit="@UpdateEvent">
+            <EditForm method="post" Model="@selectedEvent" OnValidSubmit="@UpdateEvent" FormName="EditEventForm" Enhance>
                 <DataAnnotationsValidator />
                 <ValidationSummary role="alert" />
 
@@ -81,6 +81,9 @@ else
     [SupplyParameterFromQuery]
     private int Id { get; set; }
 
+    [SupplyParameterFromForm]
+    private Event? Event { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
@@ -94,14 +97,35 @@ else
 
     private async Task UpdateEvent()
     {
-        if (selectedEvent is null) return;
-
         using var context = DbFactory.CreateDbContext();
+        context.Entry(selectedEvent).State = EntityState.Modified;
 
-        // attach & mark modified
-        context.Attach(selectedEvent).State = EntityState.Modified;
-        await context.SaveChangesAsync();
+        selectedEvent.DateUpdated = DateTime.Now;
 
-        NavigationManager.NavigateTo("/events");
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!EventExists(Event!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+    
+        NavigationManager.NavigateTo("/events", forceLoad: true);
+    }
+
+
+
+    private bool EventExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Event.Any(e => e.Id == id);
     }
 }
