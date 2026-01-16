@@ -23,6 +23,8 @@ else
                 <DataAnnotationsValidator />
                 <ValidationSummary role="alert" />
 
+                <input type="hidden" name="selectedEvent.Id" value="@selectedEvent.Id" />
+
                 <div class="mb-3">
                     <label for="title" class="form-label">Title:</label>
                     <InputText id="title" @bind-Value="selectedEvent.Title" class="form-control" />
@@ -76,31 +78,44 @@ else
 </div>
 
 @code {
-    private Event? selectedEvent;
-
     [SupplyParameterFromQuery]
     private int Id { get; set; }
 
     [SupplyParameterFromForm]
-    private Event? Event { get; set; }
+    private Event? selectedEvent { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-        selectedEvent = await context.Event.FirstOrDefaultAsync(m => m.Id == Id);
-
         if (selectedEvent is null)
         {
-            NavigationManager.NavigateTo("/events");
+            using var context = DbFactory.CreateDbContext();
+            selectedEvent = await context.Event.FirstOrDefaultAsync(m => m.Id == Id);
+
+            if (selectedEvent is null)
+            {
+                NavigationManager.NavigateTo("/events");
+            }
         }
     }
 
     private async Task UpdateEvent()
     {
         using var context = DbFactory.CreateDbContext();
-        context.Entry(selectedEvent).State = EntityState.Modified;
 
-        selectedEvent.DateUpdated = DateTime.Now;
+        // Retrieve the original entity to get DateCreated
+        var originalEvent = await context.Event.AsNoTracking().FirstOrDefaultAsync(e => e.Id == selectedEvent!.Id);
+
+        // Preserve the original DateCreated
+        if (originalEvent != null)
+        {
+            selectedEvent!.DateCreated = originalEvent.DateCreated;
+        }
+
+        // Update the DateUpdated timestamp
+        selectedEvent!.DateUpdated = DateTime.Now;
+
+        // Update the entity
+        context.Event.Update(selectedEvent);
 
         try
         {
@@ -108,7 +123,7 @@ else
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!EventExists(Event!.Id))
+            if (!EventExists(selectedEvent.Id))
             {
                 NavigationManager.NavigateTo("notfound");
             }
@@ -117,11 +132,9 @@ else
                 throw;
             }
         }
-    
-        NavigationManager.NavigateTo("/events", forceLoad: true);
+
+        NavigationManager.NavigateTo("/events");
     }
-
-
 
     private bool EventExists(int id)
     {

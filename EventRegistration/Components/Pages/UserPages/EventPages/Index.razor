@@ -15,6 +15,9 @@
 </p>
 
 <QuickGrid Class="table" Items="context.Event.AsNoTracking()">
+    <TemplateColumn Title="Title" Context="e">
+        <a href="@($"/events/{e.Id}/tickets")">@e.Title</a>
+    </TemplateColumn>
     <PropertyColumn Property="e => e.Title" />
     <PropertyColumn Property="e => e.Type" />
     <PropertyColumn Property="e => e.EventDate" />
