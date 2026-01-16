@@ -23,6 +23,8 @@
     <PropertyColumn Property="e => e.EventDate" />
     <PropertyColumn Property="e => e.Location" />
     <PropertyColumn Property="e => e.TotalCapacity" />
+    <PropertyColumn Property="e => e.Category" />
+    <PropertyColumn Property="e => e.Description" />
     <PropertyColumn Property="e => e.DateCreated" />
     <PropertyColumn Property="e => e.DateUpdated" />
     <PropertyColumn Property="e => e.CreatedBy" />
@@ -31,6 +33,8 @@
     <TemplateColumn Context="e">
         <a href="@($"/events/edit?id={e.Id}")">Edit</a> |
         <a href="@($"/events/details?id={e.Id}")">Details</a> |
+        <a href="@($"/events/{e.Id}/tickets")">Tickets</a> |
+        <a href="@($"/events/{e.Id}/payments")">Payments</a> |
         <a href="@($"/events/delete?id={e.Id}")">Delete</a>
     </TemplateColumn>
 </QuickGrid>

@@ -56,6 +56,18 @@ else
                 </div>
 
                 <div class="mb-3">
+                    <label for="category" class="form-label">Category:</label>
+                    <InputText id="category" @bind-Value="selectedEvent.Category" class="form-control" />
+                    <ValidationMessage For="() => selectedEvent.Category" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description:</label>
+                    <InputTextArea id="description" @bind-Value="selectedEvent.Description" class="form-control" />
+                    <ValidationMessage For="() => selectedEvent.Description" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
                     <label for="createdby" class="form-label">CreatedBy:</label>
                     <InputText id="createdby" @bind-Value="selectedEvent.CreatedBy" class="form-control" />
                     <ValidationMessage For="() => selectedEvent.CreatedBy" class="text-danger" />
