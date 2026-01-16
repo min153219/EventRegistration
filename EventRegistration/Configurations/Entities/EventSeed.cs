@@ -20,7 +20,10 @@
                         DateCreated = DateTime.Now,
                         DateUpdated = DateTime.Now,
                         CreatedBy = "System",
-                        UpdatedBy = "System"
+                        UpdatedBy = "System",
+                        Category = "Educational",
+                        Description = "Join us for Temasek Polytechnic's Open House! Explore our facilities, meet our faculty, and discover exciting courses.",
+                        IsFeatured = true,
                     }
                 );
             }

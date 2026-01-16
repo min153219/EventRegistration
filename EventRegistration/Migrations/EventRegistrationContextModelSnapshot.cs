@@ -162,7 +162,7 @@ namespace EventRegistration.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Event");
+                    b.ToTable("Event", (string)null);
 
                     b.HasData(
                         new
@@ -218,7 +218,7 @@ namespace EventRegistration.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Payment");
+                    b.ToTable("Payment", (string)null);
 
                     b.HasData(
                         new
@@ -267,7 +267,7 @@ namespace EventRegistration.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Registration");
+                    b.ToTable("Registration", (string)null);
 
                     b.HasData(
                         new
@@ -316,7 +316,7 @@ namespace EventRegistration.Migrations
 
                     b.HasIndex("EventId");
 
-                    b.ToTable("Ticket");
+                    b.ToTable("Ticket", (string)null);
 
                     b.HasData(
                         new
