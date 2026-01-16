@@ -10,7 +10,7 @@
 
 <h2>Ticket</h2>
 <hr />
-@if (Ticket is null)
+@if (selectedTicket is null)
 {
     <p><em>Loading...</em></p>
 }
@@ -18,44 +18,31 @@ else
 {
     <div class="row">
         <div class="col-md-4">
-            <EditForm method="post" Model="Ticket" OnValidSubmit="UpdateTicket" FormName="edit" Enhance>
+            <EditForm method="post" Model="selectedTicket" OnValidSubmit="UpdateTicket" FormName="edit" Enhance>
                 <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
-                <input type="hidden" name="Ticket.Id" value="@Ticket.Id" />
+                <ValidationSummary role="alert" />
+                <input type="hidden" name="selectedTicket.Id" value="@selectedTicket.Id" />
+                <input type="hidden" name="selectedTicket.EventId" value="@selectedTicket.EventId" />
+
                 <div class="mb-3">
                     <label for="price" class="form-label">Price:</label>
-                    <InputNumber id="price" @bind-Value="Ticket.Price" class="form-control" />
-                    <ValidationMessage For="() => Ticket.Price" class="text-danger" />
+                    <InputNumber id="price" @bind-Value="selectedTicket.Price" class="form-control" />
+                    <ValidationMessage For="() => selectedTicket.Price" class="text-danger" />
                 </div>
                 <div class="mb-3">
                     <label for="type" class="form-label">Type:</label>
-                    <InputText id="type" @bind-Value="Ticket.Type" class="form-control" />
-                    <ValidationMessage For="() => Ticket.Type" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="eventid" class="form-label">EventId:</label>
-                    <InputNumber id="eventid" @bind-Value="Ticket.EventId" class="form-control" />
-                    <ValidationMessage For="() => Ticket.EventId" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="datecreated" class="form-label">DateCreated:</label>
-                    <InputDate id="datecreated" @bind-Value="Ticket.DateCreated" class="form-control" />
-                    <ValidationMessage For="() => Ticket.DateCreated" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="dateupdated" class="form-label">DateUpdated:</label>
-                    <InputDate id="dateupdated" @bind-Value="Ticket.DateUpdated" class="form-control" />
-                    <ValidationMessage For="() => Ticket.DateUpdated" class="text-danger" />
+                    <InputText id="type" @bind-Value="selectedTicket.Type" class="form-control" />
+                    <ValidationMessage For="() => selectedTicket.Type" class="text-danger" />
                 </div>
                 <div class="mb-3">
                     <label for="createdby" class="form-label">CreatedBy:</label>
-                    <InputText id="createdby" @bind-Value="Ticket.CreatedBy" class="form-control" />
-                    <ValidationMessage For="() => Ticket.CreatedBy" class="text-danger" />
+                    <InputText id="createdby" @bind-Value="selectedTicket.CreatedBy" class="form-control" />
+                    <ValidationMessage For="() => selectedTicket.CreatedBy" class="text-danger" />
                 </div>
                 <div class="mb-3">
                     <label for="updatedby" class="form-label">UpdatedBy:</label>
-                    <InputText id="updatedby" @bind-Value="Ticket.UpdatedBy" class="form-control" />
-                    <ValidationMessage For="() => Ticket.UpdatedBy" class="text-danger" />
+                    <InputText id="updatedby" @bind-Value="selectedTicket.UpdatedBy" class="form-control" />
+                    <ValidationMessage For="() => selectedTicket.UpdatedBy" class="text-danger" />
                 </div>
                 <button type="submit" class="btn btn-primary">Save</button>
             </EditForm>
@@ -64,7 +51,7 @@ else
 }
 
 <div>
-    <a href="/tickets">Back to List</a>
+    <a href="@GetBackLink()">Back to List</a>
 </div>
 
 @code {
@@ -72,25 +59,36 @@ else
     private int Id { get; set; }
 
     [SupplyParameterFromForm]
-    private Ticket? Ticket { get; set; }
+    private Ticket? selectedTicket { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-        Ticket ??= await context.Ticket.FirstOrDefaultAsync(m => m.Id == Id);
-
-        if (Ticket is null)
+        if (selectedTicket is null)
         {
-            NavigationManager.NavigateTo("notfound");
+            using var context = DbFactory.CreateDbContext();
+            selectedTicket = await context.Ticket.FirstOrDefaultAsync(m => m.Id == Id);
+
+            if (selectedTicket is null)
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
         }
     }
 
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task UpdateTicket()
     {
         using var context = DbFactory.CreateDbContext();
-        context.Attach(Ticket!).State = EntityState.Modified;
+
+        // Get original to preserve DateCreated
+        var originalTicket = await context.Ticket.AsNoTracking().FirstOrDefaultAsync(t => t.Id == selectedTicket!.Id);
+        if (originalTicket != null)
+        {
+            selectedTicket!.DateCreated = originalTicket.DateCreated;
+        }
+
+        selectedTicket!.DateUpdated = DateTime.Now;
+
+        context.Ticket.Update(selectedTicket);
 
         try
         {
@@ -98,7 +96,7 @@ else
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!TicketExists(Ticket!.Id))
+            if (!TicketExists(selectedTicket!.Id))
             {
                 NavigationManager.NavigateTo("notfound");
             }
@@ -108,12 +106,17 @@ else
             }
         }
 
-        NavigationManager.NavigateTo("/tickets");
+        NavigationManager.NavigateTo($"/events/{selectedTicket.EventId}/tickets");
     }
 
     private bool TicketExists(int id)
     {
         using var context = DbFactory.CreateDbContext();
         return context.Ticket.Any(e => e.Id == id);
+    }
+
+    private string GetBackLink()
+    {
+        return selectedTicket != null ? $"/events/{selectedTicket.EventId}/tickets" : "/events";
     }
 }

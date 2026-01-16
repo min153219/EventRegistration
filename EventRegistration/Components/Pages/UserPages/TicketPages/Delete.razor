@@ -12,48 +12,37 @@
 <div>
     <h2>Ticket</h2>
     <hr />
-    @if (ticket is null)
+    @if (selectedTicket is null)
     {
         <p><em>Loading...</em></p>
     }
-    else {
+    else
+    {
         <dl class="row">
             <dt class="col-sm-2">Price</dt>
-            <dd class="col-sm-10">@ticket.Price</dd>
-        </dl>
-        <dl class="row">
+            <dd class="col-sm-10">@selectedTicket.Price</dd>
             <dt class="col-sm-2">Type</dt>
-            <dd class="col-sm-10">@ticket.Type</dd>
-        </dl>
-        <dl class="row">
+            <dd class="col-sm-10">@selectedTicket.Type</dd>
             <dt class="col-sm-2">EventId</dt>
-            <dd class="col-sm-10">@ticket.EventId</dd>
-        </dl>
-        <dl class="row">
+            <dd class="col-sm-10">@selectedTicket.EventId</dd>
             <dt class="col-sm-2">DateCreated</dt>
-            <dd class="col-sm-10">@ticket.DateCreated</dd>
-        </dl>
-        <dl class="row">
+            <dd class="col-sm-10">@selectedTicket.DateCreated</dd>
             <dt class="col-sm-2">DateUpdated</dt>
-            <dd class="col-sm-10">@ticket.DateUpdated</dd>
-        </dl>
-        <dl class="row">
+            <dd class="col-sm-10">@selectedTicket.DateUpdated</dd>
             <dt class="col-sm-2">CreatedBy</dt>
-            <dd class="col-sm-10">@ticket.CreatedBy</dd>
-        </dl>
-        <dl class="row">
+            <dd class="col-sm-10">@selectedTicket.CreatedBy</dd>
             <dt class="col-sm-2">UpdatedBy</dt>
-            <dd class="col-sm-10">@ticket.UpdatedBy</dd>
+            <dd class="col-sm-10">@selectedTicket.UpdatedBy</dd>
         </dl>
-        <EditForm method="post" Model="ticket" OnValidSubmit="DeleteTicket" FormName="delete" Enhance>
-            <button type="submit" class="btn btn-danger" disabled="@(ticket is null)">Delete</button> |
-            <a href="/tickets">Back to List</a>
+        <EditForm method="post" Model="selectedTicket" OnValidSubmit="DeleteTicket" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(selectedTicket is null)">Delete</button> |
+            <a href="@($"/events/{selectedTicket.EventId}/tickets")">Back to List</a>
         </EditForm>
     }
 </div>
 
 @code {
-    private Ticket? ticket;
+    private Ticket? selectedTicket;
 
     [SupplyParameterFromQuery]
     private int Id { get; set; }
@@ -61,9 +50,9 @@
     protected override async Task OnInitializedAsync()
     {
         using var context = DbFactory.CreateDbContext();
-        ticket = await context.Ticket.FirstOrDefaultAsync(m => m.Id == Id);
+        selectedTicket = await context.Ticket.FirstOrDefaultAsync(m => m.Id == Id);
 
-        if (ticket is null)
+        if (selectedTicket is null)
         {
             NavigationManager.NavigateTo("notfound");
         }
@@ -72,8 +61,8 @@
     private async Task DeleteTicket()
     {
         using var context = DbFactory.CreateDbContext();
-        context.Ticket.Remove(ticket!);
+        context.Ticket.Remove(selectedTicket!);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/tickets");
+        NavigationManager.NavigateTo($"/events/{selectedTicket!.EventId}/tickets");
     }
 }
