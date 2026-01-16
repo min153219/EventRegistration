@@ -48,6 +48,18 @@
             </div>
 
             <div class="mb-3">
+                <label for="category" class="form-label">Category:</label>
+                <InputText id="category" @bind-Value="newEvent.Category" class="form-control" />
+                <ValidationMessage For="() => newEvent.Category" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label>
+                <InputTextArea id="description" @bind-Value="newEvent.Description" class="form-control" />
+                <ValidationMessage For="() => newEvent.Description" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
                 <label for="createdby" class="form-label">CreatedBy:</label>
                 <InputText id="createdby" @bind-Value="newEvent.CreatedBy" class="form-control" />
                 <ValidationMessage For="() => newEvent.CreatedBy" class="text-danger" />

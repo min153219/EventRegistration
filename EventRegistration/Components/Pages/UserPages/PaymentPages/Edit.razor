@@ -10,7 +10,7 @@
 
 <h2>Payment</h2>
 <hr />
-@if (Payment is null)
+@if (selectedPayment is null)
 {
     <p><em>Loading...</em></p>
 }
@@ -18,63 +18,50 @@ else
 {
     <div class="row">
         <div class="col-md-4">
-            <EditForm method="post" Model="Payment" OnValidSubmit="UpdatePayment" FormName="edit" Enhance>
+            <EditForm method="post" Model="selectedPayment" OnValidSubmit="UpdatePayment" FormName="edit" Enhance>
                 <DataAnnotationsValidator />
-                <ValidationSummary role="alert"/>
-                <input type="hidden" name="Payment.Id" value="@Payment.Id" />
+                <ValidationSummary role="alert" />
+                <input type="hidden" name="selectedPayment.Id" value="@selectedPayment.Id" />
+                <input type="hidden" name="selectedPayment.RegistrationId" value="@selectedPayment.RegistrationId" />
+
                 <div class="mb-3">
                     <label for="amount" class="form-label">Amount:</label>
-                    <InputNumber id="amount" @bind-Value="Payment.Amount" class="form-control" />
-                    <ValidationMessage For="() => Payment.Amount" class="text-danger" />
+                    <InputNumber id="amount" @bind-Value="selectedPayment.Amount" class="form-control" />
+                    <ValidationMessage For="() => selectedPayment.Amount" class="text-danger" />
                 </div>
                 <div class="mb-3">
                     <label for="paymentmethod" class="form-label">PaymentMethod:</label>
-                    <InputText id="paymentmethod" @bind-Value="Payment.PaymentMethod" class="form-control" />
-                    <ValidationMessage For="() => Payment.PaymentMethod" class="text-danger" />
+                    <InputText id="paymentmethod" @bind-Value="selectedPayment.PaymentMethod" class="form-control" />
+                    <ValidationMessage For="() => selectedPayment.PaymentMethod" class="text-danger" />
                 </div>
                 <div class="mb-3">
                     <label for="currency" class="form-label">Currency:</label>
-                    <InputText id="currency" @bind-Value="Payment.Currency" class="form-control" />
-                    <ValidationMessage For="() => Payment.Currency" class="text-danger" />
+                    <InputText id="currency" @bind-Value="selectedPayment.Currency" class="form-control" />
+                    <ValidationMessage For="() => selectedPayment.Currency" class="text-danger" />
                 </div>
                 <div class="mb-3">
                     <label for="paymentdate" class="form-label">PaymentDate:</label>
-                    <InputDate id="paymentdate" @bind-Value="Payment.PaymentDate" class="form-control" />
-                    <ValidationMessage For="() => Payment.PaymentDate" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="registrationid" class="form-label">RegistrationId:</label>
-                    <InputNumber id="registrationid" @bind-Value="Payment.RegistrationId" class="form-control" />
-                    <ValidationMessage For="() => Payment.RegistrationId" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="datecreated" class="form-label">DateCreated:</label>
-                    <InputDate id="datecreated" @bind-Value="Payment.DateCreated" class="form-control" />
-                    <ValidationMessage For="() => Payment.DateCreated" class="text-danger" />
-                </div>
-                <div class="mb-3">
-                    <label for="dateupdated" class="form-label">DateUpdated:</label>
-                    <InputDate id="dateupdated" @bind-Value="Payment.DateUpdated" class="form-control" />
-                    <ValidationMessage For="() => Payment.DateUpdated" class="text-danger" />
+                    <InputDate id="paymentdate" @bind-Value="selectedPayment.PaymentDate" class="form-control" />
+                    <ValidationMessage For="() => selectedPayment.PaymentDate" class="text-danger" />
                 </div>
                 <div class="mb-3">
                     <label for="createdby" class="form-label">CreatedBy:</label>
-                    <InputText id="createdby" @bind-Value="Payment.CreatedBy" class="form-control" />
-                    <ValidationMessage For="() => Payment.CreatedBy" class="text-danger" />
+                    <InputText id="createdby" @bind-Value="selectedPayment.CreatedBy" class="form-control" />
+                    <ValidationMessage For="() => selectedPayment.CreatedBy" class="text-danger" />
                 </div>
                 <div class="mb-3">
                     <label for="updatedby" class="form-label">UpdatedBy:</label>
-                    <InputText id="updatedby" @bind-Value="Payment.UpdatedBy" class="form-control" />
-                    <ValidationMessage For="() => Payment.UpdatedBy" class="text-danger" />
+                    <InputText id="updatedby" @bind-Value="selectedPayment.UpdatedBy" class="form-control" />
+                    <ValidationMessage For="() => selectedPayment.UpdatedBy" class="text-danger" />
                 </div>
-                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-primary">Save</button>]
             </EditForm>
         </div>
     </div>
 }
 
 <div>
-    <a href="/payments">Back to List</a>
+    <a href="@GetBackLink()">Back to List</a>
 </div>
 
 @code {
@@ -82,25 +69,36 @@ else
     private int Id { get; set; }
 
     [SupplyParameterFromForm]
-    private Payment? Payment { get; set; }
+    private Payment? selectedPayment { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-        Payment ??= await context.Payment.FirstOrDefaultAsync(m => m.Id == Id);
-
-        if (Payment is null)
+        if (selectedPayment is null)
         {
-            NavigationManager.NavigateTo("notfound");
+            using var context = DbFactory.CreateDbContext();
+            selectedPayment = await context.Payment.FirstOrDefaultAsync(m => m.Id == Id);
+
+            if (selectedPayment is null)
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
         }
     }
 
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task UpdatePayment()
     {
         using var context = DbFactory.CreateDbContext();
-        context.Attach(Payment!).State = EntityState.Modified;
+
+        // Get original to preserve DateCreated
+        var originalPayment = await context.Payment.AsNoTracking().FirstOrDefaultAsync(p => p.Id == selectedPayment!.Id);
+        if (originalPayment != null)
+        {
+            selectedPayment!.DateCreated = originalPayment.DateCreated;
+        }
+
+        selectedPayment!.DateUpdated = DateTime.Now;
+
+        context.Payment.Update(selectedPayment);
 
         try
         {
@@ -108,7 +106,7 @@ else
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!PaymentExists(Payment!.Id))
+            if (!PaymentExists(selectedPayment!.Id))
             {
                 NavigationManager.NavigateTo("notfound");
             }
@@ -118,12 +116,26 @@ else
             }
         }
 
-        NavigationManager.NavigateTo("/payments");
+        NavigationManager.NavigateTo(GetBackLink());
     }
 
     private bool PaymentExists(int id)
     {
         using var context = DbFactory.CreateDbContext();
         return context.Payment.Any(e => e.Id == id);
+    }
+
+    private string GetBackLink()
+    {
+        if (selectedPayment?.RegistrationId != null)
+        {
+            using var context = DbFactory.CreateDbContext();
+            var registration = context.Registration.FirstOrDefault(r => r.Id == selectedPayment.RegistrationId);
+            if (registration != null)
+            {
+                return $"/events/{registration.EventId}/payments";
+            }
+        }
+        return "/payments";
     }
 }
