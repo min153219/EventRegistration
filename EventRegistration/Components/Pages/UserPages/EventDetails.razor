@@ -1,0 +1,222 @@
+﻿@page "/event-details/{EventId:int}"
+@rendermode InteractiveServer
+@using EventRegistration.Data
+@using EventRegistration.Domain
+@using Microsoft.EntityFrameworkCore
+@inject EventRegistrationContext DbContext
+@inject NavigationManager Navigation
+
+<PageTitle>@(eventData?.Title ?? "Event Details") - Eventora</PageTitle>
+
+<link href="/EventDetails.css" rel="stylesheet" />
+
+@if (isLoading)
+{
+    <div class="detail-loading">
+        <div class="detail-spinner"></div>
+        <p>Loading event details...</p>
+    </div>
+}
+else if (eventData == null)
+{
+    <div class="detail-not-found">
+        <div class="detail-not-found-icon">📅</div>
+        <h2>Event Not Found</h2>
+        <p>Sorry, we couldn't find the event you're looking for.</p>
+        <button class="detail-back-btn" @onclick="GoToExploreEvents">
+            ← Back to Events
+        </button>
+    </div>
+}
+else
+{
+    <div class="detail-page">
+        <!-- Back Button -->
+        <div class="detail-nav-container">
+            <button class="detail-back-link" @onclick="GoToExploreEvents">
+                ← Back to Events
+            </button>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="detail-hero">
+            <div class="detail-hero-bg"></div>
+            <div class="detail-hero-content">
+                <span class="detail-category-badge">@eventData.Category</span>
+                <h1 class="detail-title">@eventData.Title</h1>
+
+                <div class="detail-meta">
+                    <div class="detail-meta-item">
+                        <span class="detail-meta-icon">📅</span>
+                        <span>@eventData.EventDate.ToString("MMMM dd, yyyy")</span>
+                    </div>
+                    <div class="detail-meta-item">
+                        <span class="detail-meta-icon">🕐</span>
+                        <span>@eventData.EventDate.ToString("h:mm tt")</span>
+                    </div>
+                    <div class="detail-meta-item">
+                        <span class="detail-meta-icon">📍</span>
+                        <span>@eventData.Location</span>
+                    </div>
+                    <div class="detail-meta-item">
+                        <span class="detail-meta-icon">👥</span>
+                        <span>@eventData.TotalCapacity spots</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content -->
+        <section class="detail-content-section">
+            <div class="detail-container">
+                <div class="detail-grid">
+                    <!-- Left Column: Description -->
+                    <div class="detail-description-col">
+                        <div class="detail-card">
+                            <h2 class="detail-section-title">About This Event</h2>
+                            <p class="detail-description">
+                                @if (!string.IsNullOrEmpty(eventData.Description))
+                                {
+                                    @eventData.Description
+                                }
+                                else
+                                {
+                                    <text>Join us for an amazing experience at @eventData.Title! This event promises to be memorable and engaging for all attendees.</text>
+                                }
+                            </p>
+
+                            <div class="detail-info-grid">
+                                <div class="detail-info-item">
+                                    <h3>Event Type</h3>
+                                    <p>@eventData.Type</p>
+                                </div>
+                                <div class="detail-info-item">
+                                    <h3>Category</h3>
+                                    <p>@eventData.Category</p>
+                                </div>
+                                <div class="detail-info-item">
+                                    <h3>Capacity</h3>
+                                    <p>@eventData.TotalCapacity attendees</p>
+                                </div>
+                                <div class="detail-info-item">
+                                    <h3>Location</h3>
+                                    <p>@eventData.Location</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Tickets -->
+                    <div class="detail-tickets-col">
+                        <div class="detail-tickets-card">
+                            <h2 class="detail-section-title">Ticket Options</h2>
+
+                            @if (eventData.Tickets != null && eventData.Tickets.Any())
+                            {
+                                <div class="detail-tickets-list">
+                                    @foreach (var ticket in eventData.Tickets.OrderBy(t => t.Price))
+                                    {
+                                        <div class="detail-ticket-item">
+                                            <div class="detail-ticket-info">
+                                                <h3 class="detail-ticket-type">@ticket.Type</h3>
+                                                <p class="detail-ticket-price">
+                                                    @if (ticket.Price == 0)
+                                                    {
+                                                        <span class="detail-price-free">Free</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="detail-price-amount">$@ticket.Price.ToString("F2")</span>
+                                                    }
+                                                </p>
+                                            </div>
+                                            <button class="detail-ticket-select-btn" @onclick="@(() => SelectTicket(ticket.Id))">
+                                                Select
+                                            </button>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="detail-register-section">
+                                    <button class="detail-register-btn" @onclick="RegisterForEvent">
+                                        <span>Register Now</span>
+                                        <span class="detail-btn-arrow">→</span>
+                                    </button>
+                                    <p class="detail-register-note">
+                                        Registration opens a new world of experiences
+                                    </p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="detail-no-tickets">
+                                    <p>Ticket information coming soon!</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int EventId { get; set; }
+
+    private Event? eventData;
+    private bool isLoading = true;
+    private int? selectedTicketId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEventDetails();
+    }
+
+    private async Task LoadEventDetails()
+    {
+        isLoading = true;
+
+        try
+        {
+            eventData = await DbContext.Event
+                .Include(e => e.Tickets)
+                .FirstOrDefaultAsync(e => e.Id == EventId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading event details: {ex.Message}");
+            eventData = null;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void SelectTicket(int ticketId)
+    {
+        selectedTicketId = ticketId;
+        StateHasChanged();
+    }
+
+    private void RegisterForEvent()
+    {
+        if (selectedTicketId.HasValue)
+        {
+            // Navigate to registration page with selected ticket
+            Navigation.NavigateTo($"/register?eventId={EventId}&ticketId={selectedTicketId}");
+        }
+        else
+        {
+            // Navigate to registration page with just event
+            Navigation.NavigateTo($"/register?eventId={EventId}");
+        }
+    }
+
+    private void GoToExploreEvents()
+    {
+        Navigation.NavigateTo("/explore-events");
+    }
+}
