@@ -1,0 +1,392 @@
+﻿@page "/register"
+@rendermode InteractiveServer
+@using EventRegistration.Data
+@using EventRegistration.Domain
+@using Microsoft.EntityFrameworkCore
+@using System.ComponentModel.DataAnnotations
+@inject EventRegistrationContext DbContext
+@inject NavigationManager Navigation
+
+<PageTitle>Register for Event - Eventora</PageTitle>
+
+<link href="/Registration.css" rel="stylesheet" />
+
+<div class="registration-page">
+    @if (isLoading)
+    {
+        <div class="reg-loading">
+            <div class="reg-spinner"></div>
+            <p>Loading registration form...</p>
+        </div>
+    }
+    else if (eventData == null)
+    {
+        <div class="reg-error">
+            <div class="reg-error-icon">⚠️</div>
+            <h2>Event Not Found</h2>
+            <p>We couldn't find the event you're trying to register for.</p>
+            <button class="reg-back-btn" @onclick="GoToExploreEvents">
+                Back to Events
+            </button>
+        </div>
+    }
+    else if (registrationComplete)
+    {
+        <!-- Success Message -->
+        <div class="reg-success-container">
+            <div class="reg-success-icon">✓</div>
+            <h1 class="reg-success-title">Registration Successful!</h1>
+            <p class="reg-success-message">
+                Thank you for registering for <strong>@eventData.Title</strong>!
+            </p>
+
+            <div class="reg-success-details">
+                <h3>Registration Details</h3>
+                <div class="reg-success-info">
+                    <div class="reg-success-row">
+                        <span class="reg-success-label">Name:</span>
+                        <span>@registrationData.FullName</span>
+                    </div>
+                    <div class="reg-success-row">
+                        <span class="reg-success-label">Email:</span>
+                        <span>@registrationData.Email</span>
+                    </div>
+                    <div class="reg-success-row">
+                        <span class="reg-success-label">Event:</span>
+                        <span>@eventData.Title</span>
+                    </div>
+                    <div class="reg-success-row">
+                        <span class="reg-success-label">Date:</span>
+                        <span>@eventData.EventDate.ToString("MMMM dd, yyyy")</span>
+                    </div>
+                    @if (selectedTicket != null)
+                    {
+                        <div class="reg-success-row">
+                            <span class="reg-success-label">Ticket Type:</span>
+                            <span>@selectedTicket.Type</span>
+                        </div>
+                        <div class="reg-success-row">
+                            <span class="reg-success-label">Quantity:</span>
+                            <span>@quantity</span>
+                        </div>
+                        <div class="reg-success-row">
+                            <span class="reg-success-label">Total:</span>
+                            <span class="reg-success-price">$@totalPrice.ToString("F2")</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="reg-success-actions">
+                <button class="reg-success-btn-primary" @onclick="GoToExploreEvents">
+                    Explore More Events
+                </button>
+                <button class="reg-success-btn-secondary" @onclick="GoHome">
+                    Back to Home
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Registration Form -->
+        <div class="reg-container">
+            <!-- Progress Header -->
+            <div class="reg-progress">
+                <div class="reg-progress-step active">
+                    <div class="reg-progress-number">1</div>
+                    <span>Event Details</span>
+                </div>
+                <div class="reg-progress-line"></div>
+                <div class="reg-progress-step active">
+                    <div class="reg-progress-number">2</div>
+                    <span>Your Information</span>
+                </div>
+                <div class="reg-progress-line"></div>
+                <div class="reg-progress-step">
+                    <div class="reg-progress-number">3</div>
+                    <span>Confirmation</span>
+                </div>
+            </div>
+
+            <div class="reg-grid">
+                <!-- Left Column: Event Summary -->
+                <div class="reg-summary">
+                    <h2 class="reg-section-title">Event Summary</h2>
+
+                    <div class="reg-event-card">
+                        <div class="reg-event-header">
+                            <span class="reg-event-category">@eventData.Category</span>
+                            <h3 class="reg-event-title">@eventData.Title</h3>
+                        </div>
+
+                        <div class="reg-event-details">
+                            <div class="reg-event-detail">
+                                <span class="reg-icon">📅</span>
+                                <span>@eventData.EventDate.ToString("MMMM dd, yyyy")</span>
+                            </div>
+                            <div class="reg-event-detail">
+                                <span class="reg-icon">🕐</span>
+                                <span>@eventData.EventDate.ToString("h:mm tt")</span>
+                            </div>
+                            <div class="reg-event-detail">
+                                <span class="reg-icon">📍</span>
+                                <span>@eventData.Location</span>
+                            </div>
+                        </div>
+
+                        @if (selectedTicket != null)
+                        {
+                            <div class="reg-ticket-info">
+                                <h4>Selected Ticket</h4>
+                                <div class="reg-ticket-row">
+                                    <span>@selectedTicket.Type</span>
+                                    <span class="reg-ticket-price">
+                                        @if (selectedTicket.Price == 0)
+                                        {
+                                            <text>Free</text>
+                                        }
+                                        else
+                                        {
+                                            <text>$@selectedTicket.Price.ToString("F2")</text>
+                                        }
+                                    </span>
+                                </div>
+
+                                <div class="reg-quantity-selector">
+                                    <label>Quantity:</label>
+                                    <div class="reg-quantity-controls">
+                                        <button class="reg-qty-btn" @onclick="DecreaseQuantity" disabled="@(quantity <= 1)">−</button>
+                                        <input type="number" class="reg-qty-input" @bind="quantity" min="1" max="10" />
+                                        <button class="reg-qty-btn" @onclick="IncreaseQuantity" disabled="@(quantity >= 10)">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="reg-total">
+                                    <span>Total:</span>
+                                    <span class="reg-total-price">$@totalPrice.ToString("F2")</span>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="reg-no-ticket">
+                                <p>No ticket selected. You can choose one below.</p>
+
+                                @if (eventData.Tickets != null && eventData.Tickets.Any())
+                                {
+                                    <div class="reg-ticket-select-list">
+                                        @foreach (var ticket in eventData.Tickets.OrderBy(t => t.Price))
+                                        {
+                                            <button class="reg-ticket-select-btn" @onclick="@(() => SelectTicket(ticket.Id))">
+                                                <span>@ticket.Type</span>
+                                                <span>@(ticket.Price == 0 ? "Free" : $"${ticket.Price:F2}")</span>
+                                            </button>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Right Column: Registration Form -->
+                <div class="reg-form-column">
+                    <h2 class="reg-section-title">Your Information</h2>
+
+                    <div class="reg-form-card">
+                        <EditForm Model="@registrationData" OnValidSubmit="@HandleRegistration">
+                            <DataAnnotationsValidator />
+
+                            <div class="reg-form-group">
+                                <label class="reg-label">Full Name *</label>
+                                <InputText class="reg-input" @bind-Value="registrationData.FullName" placeholder="Enter your full name" />
+                                <ValidationMessage For="@(() => registrationData.FullName)" class="reg-error-message" />
+                            </div>
+
+                            <div class="reg-form-group">
+                                <label class="reg-label">Email Address *</label>
+                                <InputText type="email" class="reg-input" @bind-Value="registrationData.Email" placeholder="your.email@example.com" />
+                                <ValidationMessage For="@(() => registrationData.Email)" class="reg-error-message" />
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(errorMessage))
+                            {
+                                <div class="reg-form-error">
+                                    <span>⚠️</span>
+                                    <span>@errorMessage</span>
+                                </div>
+                            }
+
+                            <div class="reg-form-actions">
+                                <button type="button" class="reg-btn-back" @onclick="GoBack">
+                                    ← Back to Event
+                                </button>
+                                <button type="submit" class="reg-btn-submit" disabled="@isSubmitting">
+                                    @if (isSubmitting)
+                                    {
+                                        <span>Processing...</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Complete Registration</span>
+                                        <span class="reg-arrow">→</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "eventId")]
+    public int? EventId { get; set; }
+
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "ticketId")]
+    public int? TicketId { get; set; }
+
+    private Event? eventData;
+    private Ticket? selectedTicket;
+    private RegistrationFormData registrationData = new();
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+    private bool registrationComplete = false;
+    private string errorMessage = "";
+    private int quantity = 1;
+    private decimal totalPrice => selectedTicket != null ? selectedTicket.Price * quantity : 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadEventData();
+    }
+
+    private async Task LoadEventData()
+    {
+        isLoading = true;
+
+        try
+        {
+            if (!EventId.HasValue)
+            {
+                errorMessage = "No event specified";
+                eventData = null;
+                isLoading = false;
+                return;
+            }
+
+            eventData = await DbContext.Event
+                .Include(e => e.Tickets)
+                .FirstOrDefaultAsync(e => e.Id == EventId.Value);
+
+            if (eventData != null && TicketId.HasValue)
+            {
+                selectedTicket = eventData.Tickets?.FirstOrDefault(t => t.Id == TicketId.Value);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading event: {ex.Message}");
+            errorMessage = "Failed to load event details";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void SelectTicket(int ticketId)
+    {
+        selectedTicket = eventData?.Tickets?.FirstOrDefault(t => t.Id == ticketId);
+        StateHasChanged();
+    }
+
+    private void IncreaseQuantity()
+    {
+        if (quantity < 10) quantity++;
+    }
+
+    private void DecreaseQuantity()
+    {
+        if (quantity > 1) quantity--;
+    }
+
+    private async Task HandleRegistration()
+    {
+        if (eventData == null) return;
+
+        isSubmitting = true;
+        errorMessage = "";
+
+        try
+        {
+            // Create registration record
+            var registration = new EventRegistration.Domain.Registration
+            {
+                EventId = eventData.Id,
+                TicketId = selectedTicket?.Id,
+                FullName = registrationData.FullName,
+                Email = registrationData.Email,
+                Quantity = quantity,
+                TotalAmount = totalPrice,
+                RegistrationDate = DateTime.Now,
+                Status = "Confirmed",
+                DateCreated = DateTime.Now,
+                CreatedBy = registrationData.Email
+            };
+
+            DbContext.Registration.Add(registration);
+            await DbContext.SaveChangesAsync();
+
+            registrationComplete = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Registration error: {ex.Message}");
+            errorMessage = "Failed to complete registration. Please try again.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        if (EventId.HasValue)
+        {
+            Navigation.NavigateTo($"/event-details/{EventId.Value}");
+        }
+        else
+        {
+            Navigation.NavigateTo("/explore-events");
+        }
+    }
+
+    private void GoToExploreEvents()
+    {
+        Navigation.NavigateTo("/explore-events");
+    }
+
+    private void GoHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    // Registration form data model
+    public class RegistrationFormData
+    {
+        [Required(ErrorMessage = "Full name is required")]
+        [StringLength(100, ErrorMessage = "Name must be less than 100 characters")]
+        public string FullName { get; set; } = "";
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        public string Email { get; set; } = "";
+    }
+}

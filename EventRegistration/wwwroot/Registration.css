@@ -1,0 +1,662 @@
+﻿/* Registration Page Styles */
+
+.registration-page {
+    min-height: 100vh;
+    background: #f9fafb;
+    padding: 40px 20px;
+}
+
+/* Loading State */
+.reg-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 20px;
+}
+
+.reg-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e5e7eb;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error State */
+.reg-error {
+    max-width: 600px;
+    margin: 60px auto;
+    text-align: center;
+    padding: 40px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.reg-error-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+}
+
+.reg-error h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 12px;
+}
+
+.reg-error p {
+    font-size: 16px;
+    color: #6b7280;
+    margin-bottom: 30px;
+}
+
+.reg-back-btn {
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .reg-back-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+/* Main Container */
+.reg-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Progress Bar */
+.reg-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 50px;
+    padding: 30px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.reg-progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.reg-progress-number {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.reg-progress-step.active .reg-progress-number {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.reg-progress-step span {
+    font-size: 14px;
+    font-weight: 600;
+    color: #9ca3af;
+}
+
+.reg-progress-step.active span {
+    color: #1f2937;
+}
+
+.reg-progress-line {
+    width: 80px;
+    height: 2px;
+    background: #e5e7eb;
+    margin: 0 20px;
+}
+
+/* Grid Layout */
+.reg-grid {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 30px;
+}
+
+/* Section Titles */
+.reg-section-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 20px;
+}
+
+/* Event Summary Card */
+.reg-event-card {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 20px;
+}
+
+.reg-event-header {
+    margin-bottom: 20px;
+}
+
+.reg-event-category {
+    display: inline-block;
+    padding: 6px 16px;
+    background: #e0e7ff;
+    color: #667eea;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.reg-event-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+}
+
+.reg-event-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px 0;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.reg-event-detail {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    color: #4b5563;
+}
+
+.reg-icon {
+    font-size: 18px;
+}
+
+/* Ticket Info */
+.reg-ticket-info {
+    margin-top: 20px;
+}
+
+    .reg-ticket-info h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 12px;
+    }
+
+.reg-ticket-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f9fafb;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.reg-ticket-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #667eea;
+}
+
+/* Quantity Selector */
+.reg-quantity-selector {
+    margin-bottom: 20px;
+}
+
+    .reg-quantity-selector label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 8px;
+    }
+
+.reg-quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.reg-qty-btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #e5e7eb;
+    background: white;
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #667eea;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .reg-qty-btn:hover:not(:disabled) {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+
+    .reg-qty-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+.reg-qty-input {
+    width: 80px;
+    height: 40px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 0 10px;
+}
+
+/* Total */
+.reg-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-top: 2px solid #e5e7eb;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.reg-total-price {
+    font-size: 28px;
+    font-weight: 800;
+    color: #667eea;
+}
+
+/* No Ticket Selected */
+.reg-no-ticket {
+    padding: 20px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.reg-ticket-select-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.reg-ticket-select-btn {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+    .reg-ticket-select-btn:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+
+/* Form Card */
+.reg-form-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Form Groups */
+.reg-form-group {
+    margin-bottom: 24px;
+}
+
+.reg-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.reg-input,
+.reg-textarea {
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 15px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+    .reg-input:focus,
+    .reg-textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+.reg-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.reg-error-message {
+    display: block;
+    color: #ef4444;
+    font-size: 13px;
+    margin-top: 6px;
+    font-weight: 500;
+}
+
+/* Form Error */
+.reg-form-error {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    color: #991b1b;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+/* Form Actions */
+.reg-form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.reg-btn-back {
+    flex: 1;
+    padding: 16px 30px;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    color: #4b5563;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .reg-btn-back:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+    }
+
+.reg-btn-submit {
+    flex: 2;
+    padding: 16px 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+    .reg-btn-submit:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .reg-btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+.reg-arrow {
+    font-size: 20px;
+    transition: transform 0.3s ease;
+}
+
+.reg-btn-submit:hover .reg-arrow {
+    transform: translateX(4px);
+}
+
+/* Success State */
+.reg-success-container {
+    max-width: 700px;
+    margin: 60px auto;
+    text-align: center;
+    padding: 50px;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
+.reg-success-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 30px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+    font-weight: 700;
+    animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+    0% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.reg-success-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1f2937;
+    margin-bottom: 16px;
+}
+
+.reg-success-message {
+    font-size: 18px;
+    color: #6b7280;
+    margin-bottom: 40px;
+}
+
+.reg-success-details {
+    text-align: left;
+    background: #f9fafb;
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+    .reg-success-details h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 20px;
+    }
+
+.reg-success-info {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.reg-success-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+    .reg-success-row:last-child {
+        border-bottom: none;
+    }
+
+.reg-success-label {
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.reg-success-price {
+    font-size: 20px;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.reg-success-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.reg-success-btn-primary,
+.reg-success-btn-secondary {
+    padding: 14px 28px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.reg-success-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+}
+
+    .reg-success-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+.reg-success-btn-secondary {
+    background: white;
+    color: #4b5563;
+    border: 2px solid #e5e7eb;
+}
+
+    .reg-success-btn-secondary:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+    }
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .reg-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reg-event-card {
+        position: static;
+    }
+
+    .reg-progress {
+        padding: 20px;
+    }
+
+    .reg-progress-step span {
+        font-size: 12px;
+    }
+
+    .reg-progress-line {
+        width: 40px;
+        margin: 0 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .registration-page {
+        padding: 20px 15px;
+    }
+
+    .reg-form-card {
+        padding: 24px;
+    }
+
+    .reg-form-actions {
+        flex-direction: column;
+    }
+
+    .reg-btn-back,
+    .reg-btn-submit {
+        width: 100%;
+    }
+
+    .reg-success-container {
+        padding: 30px 20px;
+    }
+
+    .reg-success-title {
+        font-size: 24px;
+    }
+
+    .reg-progress-step span {
+        display: none;
+    }
+}

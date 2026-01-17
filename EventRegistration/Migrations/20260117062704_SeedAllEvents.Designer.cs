@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventRegistration.Migrations
 {
     [DbContext(typeof(EventRegistrationContext))]
-    [Migration("20260114165939_EventExplores")]
-    partial class EventExplores
+    [Migration("20260117062704_SeedAllEvents")]
+    partial class SeedAllEvents
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -100,7 +100,7 @@ namespace EventRegistration.Migrations
                         {
                             Id = "1",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "3402ebba-95d3-4a4d-9854-d6ff92295f23",
+                            ConcurrencyStamp = "6f8329c7-b520-42a9-9db3-da3246ff765c",
                             Email = "admin@localhost.com",
                             EmailConfirmed = true,
                             FirstName = "Admin",
@@ -108,9 +108,9 @@ namespace EventRegistration.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@LOCALHOST.COM",
                             NormalizedUserName = "ADMIN@LOCALHOST.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEKRrJgnpwB57VxF4y8+f+TNcgN2XXDFP/TzxaPD7cu0FOAfO/0v+/Rg+3qpRfkEIFQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEDMNuzCX5sJvblVmcyuY6373q5ryXEtMWUX/RpO9I+SPndveypVhaQVtMP2gBd/3pw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "cd20dbe3-335e-4da4-b21d-c18605839a40",
+                            SecurityStamp = "c7b4cc8c-3320-44ad-b0fc-1093c8b92c54",
                             TwoFactorEnabled = false,
                             UserName = "admin@localhost.com"
                         });
@@ -171,14 +171,96 @@ namespace EventRegistration.Migrations
                         new
                         {
                             Id = 1,
+                            Category = "Educational",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(8801),
-                            DateUpdated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(8816),
+                            DateCreated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6460),
+                            DateUpdated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6473),
+                            Description = "Join us for Temasek Polytechnic's Open House! Explore our facilities, meet our faculty, and discover exciting courses.",
                             EventDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsFeatured = false,
+                            IsFeatured = true,
                             Location = "Temasek Polytechnic, Convention Centre",
                             Title = "TP Open House",
                             TotalCapacity = 500,
+                            Type = "Physical",
+                            UpdatedBy = "System"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Category = "Professional",
+                            CreatedBy = "System",
+                            DateCreated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6476),
+                            DateUpdated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6476),
+                            Description = "Join industry leaders and tech innovators for an inspiring day of talks covering AI, cloud computing, cybersecurity, and the future of technology in Southeast Asia.",
+                            EventDate = new DateTime(2026, 2, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsFeatured = true,
+                            Location = "Marina Bay Sands Convention Centre",
+                            Title = "Tech Talks 2026",
+                            TotalCapacity = 300,
+                            Type = "Physical",
+                            UpdatedBy = "System"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Category = "Entertainment",
+                            CreatedBy = "System",
+                            DateCreated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6478),
+                            DateUpdated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6479),
+                            Description = "Experience the best of independent cinema from local and international filmmakers. Three days of screenings, Q&A sessions, and networking opportunities.",
+                            EventDate = new DateTime(2026, 3, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsFeatured = false,
+                            Location = "National Museum of Singapore",
+                            Title = "Indie Film Festival",
+                            TotalCapacity = 200,
+                            Type = "Physical",
+                            UpdatedBy = "System"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Category = "Sports",
+                            CreatedBy = "System",
+                            DateCreated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6480),
+                            DateUpdated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6481),
+                            Description = "Challenge yourself in Singapore's premier marathon event! Choose from full marathon (42km), half marathon (21km), or 10km fun run. All fitness levels welcome.",
+                            EventDate = new DateTime(2026, 4, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsFeatured = true,
+                            Location = "Marina Bay Area",
+                            Title = "City Marathon 2026",
+                            TotalCapacity = 1000,
+                            Type = "Physical",
+                            UpdatedBy = "System"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Category = "Music",
+                            CreatedBy = "System",
+                            DateCreated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6482),
+                            DateUpdated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6483),
+                            Description = "Singapore's biggest beach music festival featuring international and local artists across multiple stages. Two days of sun, sand, and amazing music!",
+                            EventDate = new DateTime(2026, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsFeatured = true,
+                            Location = "Siloso Beach, Sentosa",
+                            Title = "Summer Music Festival 2026",
+                            TotalCapacity = 5000,
+                            Type = "Physical",
+                            UpdatedBy = "System"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Category = "Arts",
+                            CreatedBy = "System",
+                            DateCreated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6484),
+                            DateUpdated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6485),
+                            Description = "Exhibitions, theater, and cultural events celebrating modern and contemporary art from Southeast Asian artists. Free admission for all visitors.",
+                            EventDate = new DateTime(2026, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsFeatured = false,
+                            Location = "City Gallery",
+                            Title = "Modern Art Exhibition",
+                            TotalCapacity = 200,
                             Type = "Physical",
                             UpdatedBy = "System"
                         });
@@ -230,8 +312,8 @@ namespace EventRegistration.Migrations
                             Amount = 0.00m,
                             CreatedBy = "System",
                             Currency = "SGD",
-                            DateCreated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(8952),
-                            DateUpdated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(8953),
+                            DateCreated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6715),
+                            DateUpdated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6716),
                             PaymentDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Free",
                             RegistrationId = 1,
@@ -256,19 +338,44 @@ namespace EventRegistration.Migrations
                     b.Property<DateTime>("DateUpdated")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<int>("EventId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("RegistrationDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("TicketId")
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int?>("TicketId")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(10, 2)");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EventId");
+
+                    b.HasIndex("TicketId");
 
                     b.ToTable("Registration");
 
@@ -277,11 +384,16 @@ namespace EventRegistration.Migrations
                         {
                             Id = 1,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(9011),
-                            DateUpdated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(9012),
+                            DateCreated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6803),
+                            DateUpdated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6803),
+                            Email = "",
                             EventId = 1,
+                            FullName = "",
+                            Quantity = 1,
                             RegistrationDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Status = "Pending",
                             TicketId = 1,
+                            TotalAmount = 0m,
                             UpdatedBy = "System"
                         });
                 });
@@ -326,8 +438,8 @@ namespace EventRegistration.Migrations
                         {
                             Id = 1,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(9089),
-                            DateUpdated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(9089),
+                            DateCreated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6891),
+                            DateUpdated = new DateTime(2026, 1, 17, 14, 27, 3, 198, DateTimeKind.Local).AddTicks(6892),
                             EventId = 1,
                             Price = 0.00m,
                             Type = "Free Admission",
@@ -487,6 +599,24 @@ namespace EventRegistration.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("EventRegistration.Domain.Registration", b =>
+                {
+                    b.HasOne("EventRegistration.Domain.Event", "Event")
+                        .WithMany()
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EventRegistration.Domain.Ticket", "Ticket")
+                        .WithMany()
+                        .HasForeignKey("TicketId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Event");
+
+                    b.Navigation("Ticket");
                 });
 
             modelBuilder.Entity("EventRegistration.Domain.Ticket", b =>

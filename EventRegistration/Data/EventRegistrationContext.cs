@@ -1,5 +1,6 @@
 ﻿using EventRegistration.Configurations.Entities;
 using EventRegistration.Data;
+using EventRegistration.Domain;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection.Emit;
@@ -25,6 +26,11 @@ namespace EventRegistration.Data
             builder.ApplyConfiguration(new RoleSeed());
             builder.ApplyConfiguration(new UserSeed());
             builder.ApplyConfiguration(new UserRoleSeed());
+            builder.Entity<Registration>()
+                .HasOne(r => r.Ticket)
+                .WithMany()
+                .HasForeignKey(r => r.TicketId)
+                .OnDelete(DeleteBehavior.NoAction);
 
         }
     }
