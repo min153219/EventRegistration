@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventRegistration.Migrations
 {
     [DbContext(typeof(EventRegistrationContext))]
-    [Migration("20260114165939_EventExplores")]
-    partial class EventExplores
+    [Migration("20260116180538_adminmanageevents")]
+    partial class adminmanageevents
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -98,9 +98,9 @@ namespace EventRegistration.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "1",
+                            Id = "3274395e-ed85-4775-a732-6e2166b6844d",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "3402ebba-95d3-4a4d-9854-d6ff92295f23",
+                            ConcurrencyStamp = "94614cbc-c766-4acc-98fb-72de3ee0a012",
                             Email = "admin@localhost.com",
                             EmailConfirmed = true,
                             FirstName = "Admin",
@@ -108,9 +108,9 @@ namespace EventRegistration.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@LOCALHOST.COM",
                             NormalizedUserName = "ADMIN@LOCALHOST.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEKRrJgnpwB57VxF4y8+f+TNcgN2XXDFP/TzxaPD7cu0FOAfO/0v+/Rg+3qpRfkEIFQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJdkfWo9yEca+MIf4zGYAP5oXadT5Tx/tqi38Ll3zHFYi3OBL4ffnpqQ+C8J3S2Bbg==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "cd20dbe3-335e-4da4-b21d-c18605839a40",
+                            SecurityStamp = "0caf3871-cacb-458a-9cbb-f9d90c2f15a2",
                             TwoFactorEnabled = false,
                             UserName = "admin@localhost.com"
                         });
@@ -151,6 +151,19 @@ namespace EventRegistration.Migrations
                     b.Property<string>("Location")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReviewedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ReviewedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
@@ -171,12 +184,15 @@ namespace EventRegistration.Migrations
                         new
                         {
                             Id = 1,
+                            Category = "Educational",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(8801),
-                            DateUpdated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(8816),
+                            DateCreated = new DateTime(2026, 1, 17, 2, 5, 37, 456, DateTimeKind.Local).AddTicks(4234),
+                            DateUpdated = new DateTime(2026, 1, 17, 2, 5, 37, 456, DateTimeKind.Local).AddTicks(4256),
+                            Description = "Join us for Temasek Polytechnic's Open House! Explore our facilities, meet our faculty, and discover exciting courses.",
                             EventDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsFeatured = false,
+                            IsFeatured = true,
                             Location = "Temasek Polytechnic, Convention Centre",
+                            Status = "Pending",
                             Title = "TP Open House",
                             TotalCapacity = 500,
                             Type = "Physical",
@@ -230,8 +246,8 @@ namespace EventRegistration.Migrations
                             Amount = 0.00m,
                             CreatedBy = "System",
                             Currency = "SGD",
-                            DateCreated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(8952),
-                            DateUpdated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(8953),
+                            DateCreated = new DateTime(2026, 1, 17, 2, 5, 37, 456, DateTimeKind.Local).AddTicks(4760),
+                            DateUpdated = new DateTime(2026, 1, 17, 2, 5, 37, 456, DateTimeKind.Local).AddTicks(4761),
                             PaymentDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Free",
                             RegistrationId = 1,
@@ -277,8 +293,8 @@ namespace EventRegistration.Migrations
                         {
                             Id = 1,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(9011),
-                            DateUpdated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(9012),
+                            DateCreated = new DateTime(2026, 1, 17, 2, 5, 37, 456, DateTimeKind.Local).AddTicks(4859),
+                            DateUpdated = new DateTime(2026, 1, 17, 2, 5, 37, 456, DateTimeKind.Local).AddTicks(4860),
                             EventId = 1,
                             RegistrationDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TicketId = 1,
@@ -326,8 +342,8 @@ namespace EventRegistration.Migrations
                         {
                             Id = 1,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(9089),
-                            DateUpdated = new DateTime(2026, 1, 15, 0, 59, 38, 728, DateTimeKind.Local).AddTicks(9089),
+                            DateCreated = new DateTime(2026, 1, 17, 2, 5, 37, 456, DateTimeKind.Local).AddTicks(4987),
+                            DateUpdated = new DateTime(2026, 1, 17, 2, 5, 37, 456, DateTimeKind.Local).AddTicks(4988),
                             EventId = 1,
                             Price = 0.00m,
                             Type = "Free Admission",
@@ -465,7 +481,7 @@ namespace EventRegistration.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "1",
+                            UserId = "3274395e-ed85-4775-a732-6e2166b6844d",
                             RoleId = "1"
                         });
                 });

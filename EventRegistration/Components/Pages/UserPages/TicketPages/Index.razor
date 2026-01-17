@@ -3,39 +3,44 @@
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using EventRegistration.Domain
 @using EventRegistration.Data
+@using Microsoft.AspNetCore.Components.Authorization
 @implements IAsyncDisposable
 @inject IDbContextFactory<EventRegistration.Data.EventRegistrationContext> DbFactory
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Event Tickets</PageTitle>
 
-@if (selectedEvent is null)
+@if (isUnauthorized)
+{
+    <div class="alert alert-danger">
+        <h4>Access Denied</h4>
+        <p>You don't have permission to view tickets for this event. Only the event creator can manage tickets.</p>
+        <a href="/events" class="btn btn-primary">Back to Events</a>
+    </div>
+}
+else if (selectedEvent is null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
     <h1>@selectedEvent.Title - Tickets</h1>
-
     <div class="card mb-4">
         <div class="card-body">
             <dl class="row">
                 <dt class="col-sm-3">Event Date:</dt>
                 <dd class="col-sm-9">@selectedEvent.EventDate.ToString("dd/MM/yyyy")</dd>
-
                 <dt class="col-sm-3">Location:</dt>
                 <dd class="col-sm-9">@selectedEvent.Location</dd>
-
                 <dt class="col-sm-3">Total Capacity:</dt>
                 <dd class="col-sm-9">@selectedEvent.TotalCapacity</dd>
             </dl>
         </div>
     </div>
-
     <p>
         <a href="@($"/events/{EventId}/tickets/create")">Create New Ticket</a>
     </p>
-
     <QuickGrid Class="table" Items="context.Ticket.Where(t => t.EventId == EventId)">
         <PropertyColumn Property="ticket => ticket.Price" />
         <PropertyColumn Property="ticket => ticket.Type" />
@@ -50,7 +55,6 @@ else
         </TemplateColumn>
     </QuickGrid>
 }
-
 <div class="mt-3">
     <a href="/events">Back to Events</a>
 </div>
@@ -61,9 +65,15 @@ else
 
     private EventRegistrationContext context = default!;
     private Event? selectedEvent;
+    private bool isUnauthorized = false;
 
     protected override async Task OnInitializedAsync()
     {
+        // Get current user info
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var currentUserEmail = authState.User.Identity?.Name;
+        var isAdmin = authState.User.IsInRole("Administrator");
+
         context = DbFactory.CreateDbContext();
         selectedEvent = await context.Event
             .AsNoTracking()
@@ -72,6 +82,13 @@ else
         if (selectedEvent is null)
         {
             NavigationManager.NavigateTo("/events");
+            return;
+        }
+
+        // ✅ Check authorization: Admin OR Event Creator
+        if (!isAdmin && selectedEvent.CreatedBy != currentUserEmail)
+        {
+            isUnauthorized = true;
         }
     }
 

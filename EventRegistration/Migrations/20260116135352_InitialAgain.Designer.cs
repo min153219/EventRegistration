@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventRegistration.Migrations
 {
     [DbContext(typeof(EventRegistrationContext))]
-    [Migration("20260109145402_AddIdentity")]
-    partial class AddIdentity
+    [Migration("20260116135352_InitialAgain")]
+    partial class InitialAgain
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,6 +43,12 @@ namespace EventRegistration.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -88,6 +94,26 @@ namespace EventRegistration.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "3274395e-ed85-4775-a732-6e2166b6844d",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "e2909414-2f29-42e7-aa99-182e5e5a2200",
+                            Email = "admin@localhost.com",
+                            EmailConfirmed = true,
+                            FirstName = "Admin",
+                            LastName = "User",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "ADMIN@LOCALHOST.COM",
+                            NormalizedUserName = "ADMIN@LOCALHOST.COM",
+                            PasswordHash = "AQAAAAIAAYagAAAAECF6iGGwH1PRUayaWnsyhNtVyrxh0d0zMKxXloHM+XR7lsZThXyFjI2ZqOw+Mxs2JA==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "6b80a22e-259e-4a39-90bb-3500e3175f7f",
+                            TwoFactorEnabled = false,
+                            UserName = "admin@localhost.com"
+                        });
                 });
 
             modelBuilder.Entity("EventRegistration.Domain.Event", b =>
@@ -98,6 +124,9 @@ namespace EventRegistration.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Category")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -107,8 +136,17 @@ namespace EventRegistration.Migrations
                     b.Property<DateTime>("DateUpdated")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("EventDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsFeatured")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Location")
                         .HasColumnType("nvarchar(max)");
@@ -133,10 +171,13 @@ namespace EventRegistration.Migrations
                         new
                         {
                             Id = 1,
+                            Category = "Educational",
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(1939),
-                            DateUpdated = new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(1958),
+                            DateCreated = new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3282),
+                            DateUpdated = new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3322),
+                            Description = "Join us for Temasek Polytechnic's Open House! Explore our facilities, meet our faculty, and discover exciting courses.",
                             EventDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsFeatured = true,
                             Location = "Temasek Polytechnic, Convention Centre",
                             Title = "TP Open House",
                             TotalCapacity = 500,
@@ -191,8 +232,8 @@ namespace EventRegistration.Migrations
                             Amount = 0.00m,
                             CreatedBy = "System",
                             Currency = "SGD",
-                            DateCreated = new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(2206),
-                            DateUpdated = new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(2207),
+                            DateCreated = new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3595),
+                            DateUpdated = new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3596),
                             PaymentDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             PaymentMethod = "Free",
                             RegistrationId = 1,
@@ -238,8 +279,8 @@ namespace EventRegistration.Migrations
                         {
                             Id = 1,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(2286),
-                            DateUpdated = new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(2287),
+                            DateCreated = new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3700),
+                            DateUpdated = new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3701),
                             EventId = 1,
                             RegistrationDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             TicketId = 1,
@@ -278,6 +319,8 @@ namespace EventRegistration.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EventId");
+
                     b.ToTable("Ticket");
 
                     b.HasData(
@@ -285,8 +328,8 @@ namespace EventRegistration.Migrations
                         {
                             Id = 1,
                             CreatedBy = "System",
-                            DateCreated = new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(2373),
-                            DateUpdated = new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(2374),
+                            DateCreated = new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3810),
+                            DateUpdated = new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3811),
                             EventId = 1,
                             Price = 0.00m,
                             Type = "Free Admission",
@@ -319,6 +362,20 @@ namespace EventRegistration.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "1",
+                            Name = "Administrator",
+                            NormalizedName = "ADMINISTRATOR"
+                        },
+                        new
+                        {
+                            Id = "2",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -406,6 +463,13 @@ namespace EventRegistration.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = "3274395e-ed85-4775-a732-6e2166b6844d",
+                            RoleId = "1"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
@@ -425,6 +489,15 @@ namespace EventRegistration.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("EventRegistration.Domain.Ticket", b =>
+                {
+                    b.HasOne("EventRegistration.Domain.Event", null)
+                        .WithMany("Tickets")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -476,6 +549,11 @@ namespace EventRegistration.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("EventRegistration.Domain.Event", b =>
+                {
+                    b.Navigation("Tickets");
                 });
 #pragma warning restore 612, 618
         }

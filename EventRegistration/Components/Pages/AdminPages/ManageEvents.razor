@@ -1,0 +1,443 @@
+﻿@page "/admin/manage-events"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using EventRegistration.Domain
+@using EventRegistration.Data
+@using Microsoft.AspNetCore.Components.Authorization
+@attribute [Authorize(Roles = "Administrator")]
+@implements IAsyncDisposable
+@inject IDbContextFactory<EventRegistrationContext> DbFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Manage Events - Admin</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-calendar-check me-2"></i>Manage Events</h1>
+            <p class="text-muted">Review and approve/reject events submitted by users</p>
+        </div>
+    </div>
+
+    <!-- Status Filter Tabs -->
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <button type="button" class="nav-link @(statusFilter == "All" ? "active" : "")" @onclick="@(() => FilterByStatus("All"))">
+                All Events (@totalEvents)
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link @(statusFilter == "Pending" ? "active" : "")" @onclick="@(() => FilterByStatus("Pending"))">
+                <i class="bi bi-clock-history me-1"></i>Pending (@pendingCount)
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link @(statusFilter == "Approved" ? "active" : "")" @onclick="@(() => FilterByStatus("Approved"))">
+                <i class="bi bi-check-circle me-1"></i>Approved (@approvedCount)
+            </button>
+        </li>
+        <li class="nav-item">
+            <button type="button" class="nav-link @(statusFilter == "Rejected" ? "active" : "")" @onclick="@(() => FilterByStatus("Rejected"))">
+                <i class="bi bi-x-circle me-1"></i>Rejected (@rejectedCount)
+            </button>
+        </li>
+    </ul>
+
+    @if (events == null || !events.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>No events found.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th style="width: 150px;">Event Title</th>
+                        <th style="width: 80px;">Type</th>
+                        <th style="width: 100px;">Event Date</th>
+                        <th style="width: 150px;">Location</th>
+                        <th style="width: 100px;">Category</th>
+                        <th style="width: 200px;">Created By</th>
+                        <th style="width: 100px;">Submitted</th>
+                        <th style="width: 120px;">Status</th>
+                        <th style="width: 280px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in filteredEvents ?? Enumerable.Empty<Event>())
+                    {
+                        <tr>
+                            <td>@e.Title</td>
+                            <td>@e.Type</td>
+                            <td>@e.EventDate.ToString("MMM dd, yyyy")</td>
+                            <td>@e.Location</td>
+                            <td>@e.Category</td>
+                            <td><small>@e.CreatedBy</small></td>
+                            <td>@e.DateCreated.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                <span class="badge @GetStatusBadgeClass(e.Status) px-2 py-1">
+                                    @if (e.Status == "Pending")
+                                    {
+                                        <i class="bi bi-clock-history me-1"></i>
+                                    }
+                                    else if (e.Status == "Approved")
+                                    {
+                                        <i class="bi bi-check-circle me-1"></i>
+                                    }
+                                    else if (e.Status == "Rejected")
+                                    {
+                                        <i class="bi bi-x-circle me-1"></i>
+                                    }
+                                    @e.Status
+                                </span>
+                                @if (!string.IsNullOrEmpty(e.ReviewedBy))
+                                {
+                                    <div class="small text-muted mt-1">
+                                        by @e.ReviewedBy
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                @{
+                                    var currentEvent = e;
+                                }
+                                <div class="d-flex gap-1 flex-wrap">
+                                    @if (currentEvent.Status == "Pending")
+                                    {
+                                        <button type="button" class="btn btn-sm btn-success" @onclick="() => ShowApproveModal(currentEvent)">
+                                            <i class="bi bi-check-circle"></i> Approve
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => ShowRejectModal(currentEvent)">
+                                            <i class="bi bi-x-circle"></i> Reject
+                                        </button>
+                                    }
+                                    else if (currentEvent.Status == "Approved")
+                                    {
+                                        <button type="button" class="btn btn-sm btn-warning" @onclick="() => ShowRejectModal(currentEvent)">
+                                            <i class="bi bi-x-circle"></i> Revoke
+                                        </button>
+                                    }
+                                    else if (currentEvent.Status == "Rejected")
+                                    {
+                                        <button type="button" class="btn btn-sm btn-success" @onclick="() => ShowApproveModal(currentEvent)">
+                                            <i class="bi bi-check-circle"></i> Approve
+                                        </button>
+                                    }
+                                    <a href="@($"/events/details/{currentEvent.Id}")" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Approve Modal -->
+@if (showApproveModal && selectedEvent != null)
+{
+    <div class="modal-backdrop fade show" @onclick="CloseModals"></div>
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" style="z-index: 1055;">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-check-circle me-2"></i>Approve Event
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseModals"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to approve this event?</p>
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title">@selectedEvent.Title</h6>
+                            <p class="card-text mb-1">
+                                <strong>Type:</strong> @selectedEvent.Type<br />
+                                <strong>Date:</strong> @selectedEvent.EventDate.ToString("MMMM dd, yyyy")<br />
+                                <strong>Location:</strong> @selectedEvent.Location<br />
+                                <strong>Created by:</strong> @selectedEvent.CreatedBy
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModals">Cancel</button>
+                    <button type="button" class="btn btn-success" @onclick="ApproveEvent">
+                        <i class="bi bi-check-circle me-1"></i>Approve Event
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Reject Modal -->
+@if (showRejectModal && selectedEvent != null)
+{
+    <div class="modal-backdrop fade show" @onclick="CloseModals"></div>
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" style="z-index: 1055;">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-x-circle me-2"></i>Reject Event
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseModals"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to reject this event?</p>
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title">@selectedEvent.Title</h6>
+                            <p class="card-text mb-1">
+                                <strong>Type:</strong> @selectedEvent.Type<br />
+                                <strong>Date:</strong> @selectedEvent.EventDate.ToString("MMMM dd, yyyy")<br />
+                                <strong>Location:</strong> @selectedEvent.Location<br />
+                                <strong>Created by:</strong> @selectedEvent.CreatedBy
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="rejectionReason" class="form-label fw-bold text-danger">
+                            Reason for Rejection (Required):
+                        </label>
+                        <textarea id="rejectionReason" @bind="rejectionReason" @bind:event="oninput"
+                                  class="form-control" rows="3"
+                                  placeholder="Provide a clear reason for rejection so the creator understands why..."></textarea>
+                        @if (string.IsNullOrWhiteSpace(rejectionReason))
+                        {
+                            <small class="text-danger">Please enter a rejection reason</small>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModals">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="RejectEvent" disabled="@string.IsNullOrWhiteSpace(rejectionReason)">
+                        <i class="bi bi-x-circle me-1"></i>Reject Event
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .table {
+        background-color: white;
+        border: 1px solid #dee2e6;
+    }
+
+        .table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+            padding: 0.75rem;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .table td {
+            vertical-align: middle;
+            padding: 0.75rem;
+        }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .nav-tabs .nav-link {
+        color: #495057;
+        cursor: pointer;
+        border: none;
+    }
+
+        .nav-tabs .nav-link.active {
+            font-weight: 600;
+            border-bottom: 3px solid #0d6efd;
+        }
+
+    .modal-backdrop {
+        background-color: rgba(0,0,0,0.5);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1050;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>
+
+@code {
+    private EventRegistrationContext context = default!;
+    private string? currentAdminEmail;
+    private List<Event>? events;
+    private IEnumerable<Event>? filteredEvents;
+
+    private string statusFilter = "Pending";
+    private int totalEvents = 0;
+    private int pendingCount = 0;
+    private int approvedCount = 0;
+    private int rejectedCount = 0;
+
+    private bool showApproveModal = false;
+    private bool showRejectModal = false;
+    private Event? selectedEvent;
+    private string rejectionReason = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        context = DbFactory.CreateDbContext();
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        currentAdminEmail = authState.User.Identity?.Name;
+
+        await LoadEvents();
+    }
+
+    private async Task LoadEvents()
+    {
+        events = await context.Event
+            .AsNoTracking()
+            .OrderByDescending(e => e.DateCreated)
+            .ToListAsync();
+
+        totalEvents = events.Count;
+        pendingCount = events.Count(e => e.Status == "Pending");
+        approvedCount = events.Count(e => e.Status == "Approved");
+        rejectedCount = events.Count(e => e.Status == "Rejected");
+
+        FilterByStatus(statusFilter);
+    }
+
+    private void FilterByStatus(string status)
+    {
+        statusFilter = status;
+
+        if (status == "All")
+        {
+            filteredEvents = events;
+        }
+        else
+        {
+            filteredEvents = events?.Where(e => e.Status == status);
+        }
+
+        StateHasChanged();
+    }
+
+    private void ShowApproveModal(Event evt)
+    {
+        selectedEvent = evt;
+        showApproveModal = true;
+        showRejectModal = false;
+        StateHasChanged();
+        Console.WriteLine($"ShowApproveModal called for: {evt.Title}");
+    }
+
+    private void ShowRejectModal(Event evt)
+    {
+        selectedEvent = evt;
+        rejectionReason = selectedEvent.RejectionReason ?? string.Empty;
+        showRejectModal = true;
+        showApproveModal = false;
+        StateHasChanged();
+        Console.WriteLine($"ShowRejectModal called for: {evt.Title}");
+    }
+
+    private void CloseModals()
+    {
+        showApproveModal = false;
+        showRejectModal = false;
+        selectedEvent = null;
+        rejectionReason = string.Empty;
+        StateHasChanged();
+    }
+
+    private async Task ApproveEvent()
+    {
+        if (selectedEvent == null) return;
+
+        try
+        {
+            Console.WriteLine($"Approving event: {selectedEvent.Id}");
+
+            var eventToUpdate = await context.Event.FindAsync(selectedEvent.Id);
+            if (eventToUpdate != null)
+            {
+                eventToUpdate.Status = "Approved";
+                eventToUpdate.ReviewedBy = currentAdminEmail;
+                eventToUpdate.ReviewedDate = DateTime.Now;
+                eventToUpdate.RejectionReason = null;
+                eventToUpdate.DateUpdated = DateTime.Now;
+                eventToUpdate.UpdatedBy = currentAdminEmail;
+
+                await context.SaveChangesAsync();
+                Console.WriteLine("Event approved successfully");
+            }
+
+            CloseModals();
+            await LoadEvents();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error approving event: {ex.Message}");
+        }
+    }
+
+    private async Task RejectEvent()
+    {
+        if (selectedEvent == null || string.IsNullOrWhiteSpace(rejectionReason))
+        {
+            Console.WriteLine("Cannot reject: selectedEvent is null or rejection reason is empty");
+            return;
+        }
+
+        try
+        {
+            Console.WriteLine($"Rejecting event: {selectedEvent.Id} with reason: {rejectionReason}");
+
+            var eventToUpdate = await context.Event.FindAsync(selectedEvent.Id);
+            if (eventToUpdate != null)
+            {
+                eventToUpdate.Status = "Rejected";
+                eventToUpdate.ReviewedBy = currentAdminEmail;
+                eventToUpdate.ReviewedDate = DateTime.Now;
+                eventToUpdate.RejectionReason = rejectionReason.Trim();
+                eventToUpdate.DateUpdated = DateTime.Now;
+                eventToUpdate.UpdatedBy = currentAdminEmail;
+
+                await context.SaveChangesAsync();
+                Console.WriteLine("Event rejected successfully");
+            }
+
+            CloseModals();
+            await LoadEvents();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error rejecting event: {ex.Message}");
+        }
+    }
+
+    private string GetStatusBadgeClass(string? status)
+        => status switch
+        {
+            "Pending" => "bg-warning text-dark",
+            "Approved" => "bg-success text-white",
+            "Rejected" => "bg-danger text-white",
+            _ => "bg-secondary text-white"
+        };
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

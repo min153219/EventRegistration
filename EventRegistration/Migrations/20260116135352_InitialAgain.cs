@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace EventRegistration.Migrations
 {
     /// <inheritdoc />
-    public partial class AddIdentity : Migration
+    public partial class InitialAgain : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,6 +32,8 @@ namespace EventRegistration.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -48,6 +52,71 @@ namespace EventRegistration.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Event",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EventDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Location = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TotalCapacity = table.Column<int>(type: "int", nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsFeatured = table.Column<bool>(type: "bit", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Event", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Payment",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Currency = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    RegistrationId = table.Column<int>(type: "int", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payment", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Registration",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EventId = table.Column<int>(type: "int", nullable: false),
+                    TicketId = table.Column<int>(type: "int", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Registration", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -156,33 +225,69 @@ namespace EventRegistration.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.UpdateData(
+            migrationBuilder.CreateTable(
+                name: "Ticket",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EventId = table.Column<int>(type: "int", nullable: false),
+                    DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Ticket", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Ticket_Event_EventId",
+                        column: x => x.EventId,
+                        principalTable: "Event",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { "1", null, "Administrator", "ADMINISTRATOR" },
+                    { "2", null, "User", "USER" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
+                values: new object[] { "3274395e-ed85-4775-a732-6e2166b6844d", 0, "e2909414-2f29-42e7-aa99-182e5e5a2200", "admin@localhost.com", true, "Admin", "User", false, null, "ADMIN@LOCALHOST.COM", "ADMIN@LOCALHOST.COM", "AQAAAAIAAYagAAAAECF6iGGwH1PRUayaWnsyhNtVyrxh0d0zMKxXloHM+XR7lsZThXyFjI2ZqOw+Mxs2JA==", null, false, "6b80a22e-259e-4a39-90bb-3500e3175f7f", false, "admin@localhost.com" });
+
+            migrationBuilder.InsertData(
                 table: "Event",
-                keyColumn: "Id",
-                keyValue: 1,
-                columns: new[] { "DateCreated", "DateUpdated" },
-                values: new object[] { new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(1939), new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(1958) });
+                columns: new[] { "Id", "Category", "CreatedBy", "DateCreated", "DateUpdated", "Description", "EventDate", "ImageUrl", "IsFeatured", "Location", "Title", "TotalCapacity", "Type", "UpdatedBy" },
+                values: new object[] { 1, "Educational", "System", new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3282), new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3322), "Join us for Temasek Polytechnic's Open House! Explore our facilities, meet our faculty, and discover exciting courses.", new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), null, true, "Temasek Polytechnic, Convention Centre", "TP Open House", 500, "Physical", "System" });
 
-            migrationBuilder.UpdateData(
+            migrationBuilder.InsertData(
                 table: "Payment",
-                keyColumn: "Id",
-                keyValue: 1,
-                columns: new[] { "DateCreated", "DateUpdated" },
-                values: new object[] { new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(2206), new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(2207) });
+                columns: new[] { "Id", "Amount", "CreatedBy", "Currency", "DateCreated", "DateUpdated", "PaymentDate", "PaymentMethod", "RegistrationId", "UpdatedBy" },
+                values: new object[] { 1, 0.00m, "System", "SGD", new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3595), new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3596), new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "Free", 1, "System" });
 
-            migrationBuilder.UpdateData(
+            migrationBuilder.InsertData(
                 table: "Registration",
-                keyColumn: "Id",
-                keyValue: 1,
-                columns: new[] { "DateCreated", "DateUpdated" },
-                values: new object[] { new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(2286), new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(2287) });
+                columns: new[] { "Id", "CreatedBy", "DateCreated", "DateUpdated", "EventId", "RegistrationDate", "TicketId", "UpdatedBy" },
+                values: new object[] { 1, "System", new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3700), new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3701), 1, new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), 1, "System" });
 
-            migrationBuilder.UpdateData(
+            migrationBuilder.InsertData(
+                table: "AspNetUserRoles",
+                columns: new[] { "RoleId", "UserId" },
+                values: new object[] { "1", "3274395e-ed85-4775-a732-6e2166b6844d" });
+
+            migrationBuilder.InsertData(
                 table: "Ticket",
-                keyColumn: "Id",
-                keyValue: 1,
-                columns: new[] { "DateCreated", "DateUpdated" },
-                values: new object[] { new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(2373), new DateTime(2026, 1, 9, 22, 54, 1, 435, DateTimeKind.Local).AddTicks(2374) });
+                columns: new[] { "Id", "CreatedBy", "DateCreated", "DateUpdated", "EventId", "Price", "Type", "UpdatedBy" },
+                values: new object[] { 1, "System", new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3810), new DateTime(2026, 1, 16, 21, 53, 51, 983, DateTimeKind.Local).AddTicks(3811), 1, 0.00m, "Free Admission", "System" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -222,6 +327,11 @@ namespace EventRegistration.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Ticket_EventId",
+                table: "Ticket",
+                column: "EventId");
         }
 
         /// <inheritdoc />
@@ -243,38 +353,22 @@ namespace EventRegistration.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Payment");
+
+            migrationBuilder.DropTable(
+                name: "Registration");
+
+            migrationBuilder.DropTable(
+                name: "Ticket");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
-            migrationBuilder.UpdateData(
-                table: "Event",
-                keyColumn: "Id",
-                keyValue: 1,
-                columns: new[] { "DateCreated", "DateUpdated" },
-                values: new object[] { new DateTime(2026, 1, 9, 21, 57, 49, 275, DateTimeKind.Local).AddTicks(4742), new DateTime(2026, 1, 9, 21, 57, 49, 275, DateTimeKind.Local).AddTicks(4767) });
-
-            migrationBuilder.UpdateData(
-                table: "Payment",
-                keyColumn: "Id",
-                keyValue: 1,
-                columns: new[] { "DateCreated", "DateUpdated" },
-                values: new object[] { new DateTime(2026, 1, 9, 21, 57, 49, 275, DateTimeKind.Local).AddTicks(5012), new DateTime(2026, 1, 9, 21, 57, 49, 275, DateTimeKind.Local).AddTicks(5013) });
-
-            migrationBuilder.UpdateData(
-                table: "Registration",
-                keyColumn: "Id",
-                keyValue: 1,
-                columns: new[] { "DateCreated", "DateUpdated" },
-                values: new object[] { new DateTime(2026, 1, 9, 21, 57, 49, 275, DateTimeKind.Local).AddTicks(5112), new DateTime(2026, 1, 9, 21, 57, 49, 275, DateTimeKind.Local).AddTicks(5113) });
-
-            migrationBuilder.UpdateData(
-                table: "Ticket",
-                keyColumn: "Id",
-                keyValue: 1,
-                columns: new[] { "DateCreated", "DateUpdated" },
-                values: new object[] { new DateTime(2026, 1, 9, 21, 57, 49, 275, DateTimeKind.Local).AddTicks(5254), new DateTime(2026, 1, 9, 21, 57, 49, 275, DateTimeKind.Local).AddTicks(5255) });
+            migrationBuilder.DropTable(
+                name: "Event");
         }
     }
 }

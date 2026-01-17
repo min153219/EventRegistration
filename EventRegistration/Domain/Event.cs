@@ -13,5 +13,11 @@
         public bool IsFeatured { get; set; }
 
         public virtual ICollection<Ticket>? Tickets { get; set; }
+
+        // New fields for approval workflow
+        public string Status { get; set; } = "Pending"; // Pending, Approved, Rejected
+        public string? ReviewedBy { get; set; }
+        public DateTime? ReviewedDate { get; set; }
+        public string? RejectionReason { get; set; }
     }
 }
