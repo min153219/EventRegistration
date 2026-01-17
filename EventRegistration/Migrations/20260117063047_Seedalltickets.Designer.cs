@@ -4,6 +4,7 @@ using EventRegistration.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EventRegistration.Migrations
 {
     [DbContext(typeof(EventRegistrationContext))]
-    partial class EventRegistrationContextModelSnapshot : ModelSnapshot
+    [Migration("20260117063047_Seedalltickets")]
+    partial class Seedalltickets
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,11 +98,8 @@ namespace EventRegistration.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "3274395e-ed85-4775-a732-6e2166b6844d",
+                            Id = "1",
                             AccessFailedCount = 0,
-
-               
-
                             ConcurrencyStamp = "e88dac0d-43dc-4898-a6dd-94b5923b3a99",
                             Email = "admin@localhost.com",
                             EmailConfirmed = true,
@@ -151,19 +151,6 @@ namespace EventRegistration.Migrations
                     b.Property<string>("Location")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("RejectionReason")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReviewedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ReviewedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
@@ -192,7 +179,6 @@ namespace EventRegistration.Migrations
                             EventDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             IsFeatured = true,
                             Location = "Temasek Polytechnic, Convention Centre",
-                            Status = "Pending",
                             Title = "TP Open House",
                             TotalCapacity = 500,
                             Type = "Physical",
@@ -690,7 +676,7 @@ namespace EventRegistration.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "3274395e-ed85-4775-a732-6e2166b6844d",
+                            UserId = "1",
                             RoleId = "1"
                         });
                 });
