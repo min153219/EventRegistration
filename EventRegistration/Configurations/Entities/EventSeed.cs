@@ -24,6 +24,9 @@
                         Category = "Educational",
                         Description = "Join us for Temasek Polytechnic's Open House! Explore our facilities, meet our faculty, and discover exciting courses.",
                         IsFeatured = true,
+                        Status = "Approved",  
+                        ReviewedBy = "System",
+                        ReviewedDate = DateTime.Now,
                     },
                     // Event 2: Tech Talks 2026
                 new Event
@@ -41,6 +44,9 @@
                     Category = "Professional",
                     Description = "Join industry leaders and tech innovators for an inspiring day of talks covering AI, cloud computing, cybersecurity, and the future of technology in Southeast Asia.",
                     IsFeatured = true,
+                    Status = "Approved",
+                    ReviewedBy = "System",
+                    ReviewedDate = DateTime.Now,
                 },
 
                 // Event 3: Indie Film Festival
@@ -59,6 +65,9 @@
                     Category = "Entertainment",
                     Description = "Experience the best of independent cinema from local and international filmmakers. Three days of screenings, Q&A sessions, and networking opportunities.",
                     IsFeatured = false,
+                    Status = "Approved",
+                    ReviewedBy = "System",
+                    ReviewedDate = DateTime.Now,
                 },
 
                 // Event 4: City Marathon 2026
@@ -77,6 +86,9 @@
                     Category = "Sports",
                     Description = "Challenge yourself in Singapore's premier marathon event! Choose from full marathon (42km), half marathon (21km), or 10km fun run. All fitness levels welcome.",
                     IsFeatured = true,
+                    Status = "Approved",
+                    ReviewedBy = "System",
+                    ReviewedDate = DateTime.Now,
                 },
 
                 // Event 5: Summer Music Festival 2026
@@ -95,6 +107,9 @@
                     Category = "Music",
                     Description = "Singapore's biggest beach music festival featuring international and local artists across multiple stages. Two days of sun, sand, and amazing music!",
                     IsFeatured = true,
+                    Status = "Approved",
+                    ReviewedBy = "System",
+                    ReviewedDate = DateTime.Now,
                 },
 
                 // Event 6: Modern Art Exhibition
@@ -113,6 +128,9 @@
                     Category = "Arts",
                     Description = "Exhibitions, theater, and cultural events celebrating modern and contemporary art from Southeast Asian artists. Free admission for all visitors.",
                     IsFeatured = false,
+                    Status = "Approved",
+                    ReviewedBy = "System",
+                    ReviewedDate = DateTime.Now,
                 }
                 );
             }

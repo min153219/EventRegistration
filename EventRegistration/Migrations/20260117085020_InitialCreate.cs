@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace EventRegistration.Migrations
 {
     /// <inheritdoc />
-    public partial class AddUserFieldsToRegistration : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -69,6 +69,10 @@ namespace EventRegistration.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsFeatured = table.Column<bool>(type: "bit", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ReviewedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ReviewedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    RejectionReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DateUpdated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -278,32 +282,52 @@ namespace EventRegistration.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "1", 0, "87ed98db-c46d-45ab-a057-f61bf1a6f8c4", "admin@localhost.com", true, "Admin", "User", false, null, "ADMIN@LOCALHOST.COM", "ADMIN@LOCALHOST.COM", "AQAAAAIAAYagAAAAEGQOS0Uy8Kssra0KPyKHg0Eyz3N1aDLhl4SflgaeidG/DSthOStAq2Nddc9AJ6djdg==", null, false, "46c30ff9-4129-4c06-81b9-bef1c4ef2705", false, "admin@localhost.com" });
+                values: new object[] { "3274395e-ed85-4775-a732-6e2166b6844d", 0, "ae7a402e-0297-46e6-906c-ebbf6a704cae", "admin@localhost.com", true, "Admin", "User", false, null, "ADMIN@LOCALHOST.COM", "ADMIN@LOCALHOST.COM", "AQAAAAIAAYagAAAAEGSw06xJxKGi3GyhL67vEmdVQKynHPruUbmcR7wS8DQQm6Yb5ZR6ni/QcslXJJIjoQ==", null, false, "d8d2a0f9-cbce-4a22-88d1-e171a58e884d", false, "admin@localhost.com" });
 
             migrationBuilder.InsertData(
                 table: "Event",
-                columns: new[] { "Id", "Category", "CreatedBy", "DateCreated", "DateUpdated", "Description", "EventDate", "ImageUrl", "IsFeatured", "Location", "Title", "TotalCapacity", "Type", "UpdatedBy" },
-                values: new object[] { 1, "Educational", "System", new DateTime(2026, 1, 16, 21, 34, 31, 518, DateTimeKind.Local).AddTicks(1961), new DateTime(2026, 1, 16, 21, 34, 31, 518, DateTimeKind.Local).AddTicks(1977), "Join us for Temasek Polytechnic's Open House! Explore our facilities, meet our faculty, and discover exciting courses.", new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), null, true, "Temasek Polytechnic, Convention Centre", "TP Open House", 500, "Physical", "System" });
+                columns: new[] { "Id", "Category", "CreatedBy", "DateCreated", "DateUpdated", "Description", "EventDate", "ImageUrl", "IsFeatured", "Location", "RejectionReason", "ReviewedBy", "ReviewedDate", "Status", "Title", "TotalCapacity", "Type", "UpdatedBy" },
+                values: new object[,]
+                {
+                    { 1, "Educational", "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(2366), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(2380), "Join us for Temasek Polytechnic's Open House! Explore our facilities, meet our faculty, and discover exciting courses.", new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), null, true, "Temasek Polytechnic, Convention Centre", null, null, null, "Pending", "TP Open House", 500, "Physical", "System" },
+                    { 2, "Professional", "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(2475), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(2475), "Join industry leaders and tech innovators for an inspiring day of talks covering AI, cloud computing, cybersecurity, and the future of technology in Southeast Asia.", new DateTime(2026, 2, 20, 0, 0, 0, 0, DateTimeKind.Unspecified), null, true, "Marina Bay Sands Convention Centre", null, null, null, "Pending", "Tech Talks 2026", 300, "Physical", "System" },
+                    { 3, "Entertainment", "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(2479), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(2480), "Experience the best of independent cinema from local and international filmmakers. Three days of screenings, Q&A sessions, and networking opportunities.", new DateTime(2026, 3, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), null, false, "National Museum of Singapore", null, null, null, "Pending", "Indie Film Festival", 200, "Physical", "System" },
+                    { 4, "Sports", "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(2483), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(2484), "Challenge yourself in Singapore's premier marathon event! Choose from full marathon (42km), half marathon (21km), or 10km fun run. All fitness levels welcome.", new DateTime(2026, 4, 5, 0, 0, 0, 0, DateTimeKind.Unspecified), null, true, "Marina Bay Area", null, null, null, "Pending", "City Marathon 2026", 1000, "Physical", "System" },
+                    { 5, "Music", "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(2487), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(2487), "Singapore's biggest beach music festival featuring international and local artists across multiple stages. Two days of sun, sand, and amazing music!", new DateTime(2026, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), null, true, "Siloso Beach, Sentosa", null, null, null, "Pending", "Summer Music Festival 2026", 5000, "Physical", "System" },
+                    { 6, "Arts", "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(2490), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(2491), "Exhibitions, theater, and cultural events celebrating modern and contemporary art from Southeast Asian artists. Free admission for all visitors.", new DateTime(2026, 1, 20, 0, 0, 0, 0, DateTimeKind.Unspecified), null, false, "City Gallery", null, null, null, "Pending", "Modern Art Exhibition", 200, "Physical", "System" }
+                });
 
             migrationBuilder.InsertData(
                 table: "Payment",
                 columns: new[] { "Id", "Amount", "CreatedBy", "Currency", "DateCreated", "DateUpdated", "PaymentDate", "PaymentMethod", "RegistrationId", "UpdatedBy" },
-                values: new object[] { 1, 0.00m, "System", "SGD", new DateTime(2026, 1, 16, 21, 34, 31, 518, DateTimeKind.Local).AddTicks(2262), new DateTime(2026, 1, 16, 21, 34, 31, 518, DateTimeKind.Local).AddTicks(2262), new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "Free", 1, "System" });
+                values: new object[] { 1, 0.00m, "System", "SGD", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(2801), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(2801), new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "Free", 1, "System" });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { "1", "1" });
+                values: new object[] { "1", "3274395e-ed85-4775-a732-6e2166b6844d" });
 
             migrationBuilder.InsertData(
                 table: "Ticket",
                 columns: new[] { "Id", "CreatedBy", "DateCreated", "DateUpdated", "EventId", "Price", "Type", "UpdatedBy" },
-                values: new object[] { 1, "System", new DateTime(2026, 1, 16, 21, 34, 31, 518, DateTimeKind.Local).AddTicks(2454), new DateTime(2026, 1, 16, 21, 34, 31, 518, DateTimeKind.Local).AddTicks(2455), 1, 0.00m, "Free Admission", "System" });
+                values: new object[,]
+                {
+                    { 1, "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3166), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3167), 1, 0.00m, "Free Admission", "System" },
+                    { 2, "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3170), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3170), 2, 75.00m, "General Admission", "System" },
+                    { 3, "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3172), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3173), 2, 120.00m, "VIP Pass", "System" },
+                    { 4, "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3175), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3176), 3, 35.00m, "Standard Pass", "System" },
+                    { 5, "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3178), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3179), 3, 25.00m, "Student Pass", "System" },
+                    { 6, "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3181), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3182), 4, 50.00m, "Runner Registration", "System" },
+                    { 7, "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3184), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3184), 5, 45.00m, "General Admission", "System" },
+                    { 8, "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3186), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3187), 5, 80.00m, "VIP Experience", "System" },
+                    { 9, "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3189), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3190), 5, 30.00m, "Early Bird", "System" },
+                    { 10, "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3192), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3192), 6, 0.00m, "Free Admission", "System" }
+                });
 
             migrationBuilder.InsertData(
                 table: "Registration",
                 columns: new[] { "Id", "CreatedBy", "DateCreated", "DateUpdated", "Email", "EventId", "FullName", "Quantity", "RegistrationDate", "Status", "TicketId", "TotalAmount", "UpdatedBy" },
-                values: new object[] { 1, "System", new DateTime(2026, 1, 16, 21, 34, 31, 518, DateTimeKind.Local).AddTicks(2353), new DateTime(2026, 1, 16, 21, 34, 31, 518, DateTimeKind.Local).AddTicks(2354), "", 1, "", 1, new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "Pending", 1, 0m, "System" });
+                values: new object[] { 1, "System", new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3031), new DateTime(2026, 1, 17, 16, 50, 19, 842, DateTimeKind.Local).AddTicks(3032), "", 1, "", 1, new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "Pending", 1, 0m, "System" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
