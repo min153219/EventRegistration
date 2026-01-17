@@ -1,462 +1,656 @@
-﻿@page "/dashboard"
-@page "/admin/dashboard"
-@using Microsoft.AspNetCore.Authorization
+﻿@page "/admin/dashboard"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using EventRegistration.Domain
+@using EventRegistration.Data
+@using Microsoft.AspNetCore.Components.Authorization
 @attribute [Authorize(Roles = "Administrator")]
+@implements IAsyncDisposable
+@inject IDbContextFactory<EventRegistrationContext> DbFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
 
 <PageTitle>Admin Dashboard</PageTitle>
 
-<div class="dashboard-container">
-    <div class="dashboard-header">
-        <h1>Admin Dashboard</h1>
-        <p class="subtitle">Overview of system statistics and user activity</p>
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</h1>
+            <p class="text-muted">Overview of your event management system</p>
+        </div>
     </div>
 
     @if (isLoading)
     {
-        <div class="loading-container">
-            <div class="spinner"></div>
-            <p>Loading dashboard data...</p>
-        </div>
-    }
-    else if (errorMessage != null)
-    {
-        <div class="error-message">
-            <p>@errorMessage</p>
-            <button class="btn-retry" @onclick="LoadDashboardData">Retry</button>
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
         </div>
     }
     else
     {
-        <!-- Quick Stats Grid -->
-        <div class="stats-grid">
-            <!-- Total Users by Role -->
-            <div class="stat-card stat-primary">
-                <div class="stat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                </div>
-                <div class="stat-content">
-                    <h3>Total Users</h3>
-                    <p class="stat-number">@stats.TotalUsers</p>
-                    <div class="stat-breakdown">
-                        <span class="badge badge-admin">Admins: @stats.TotalAdmins</span>
-                        <span class="badge badge-user">Users: @stats.TotalRegularUsers</span>
+        <!-- Metric Cards -->
+        <div class="row g-4 mb-4">
+            <!-- Total Events Card -->
+            <div class="col-md-4 col-lg">
+                <div class="card metric-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Events</h6>
+                                <h2 class="mb-0 fw-bold">@totalEvents</h2>
+                                <small class="text-muted">
+                                    @pendingCount Pending, @approvedCount Approved
+                                </small>
+                            </div>
+                            <div class="metric-icon bg-primary">
+                                <i class="bi bi-calendar-event"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- New Users -->
-            <div class="stat-card stat-success">
-                <div class="stat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <line x1="19" y1="8" x2="19" y2="14"></line>
-                        <line x1="22" y1="11" x2="16" y2="11"></line>
-                    </svg>
-                </div>
-                <div class="stat-content">
-                    <h3>New Users</h3>
-                    <p class="stat-number">@stats.NewUsersLast7Days</p>
-                    <p class="stat-label">Last 7 days</p>
-                </div>
-            </div>
-
-            <!-- Registrations Today -->
-            <div class="stat-card stat-info">
-                <div class="stat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
-                </div>
-                <div class="stat-content">
-                    <h3>Registrations</h3>
-                    <p class="stat-number">@stats.RegistrationsToday</p>
-                    <p class="stat-label">Today | Week: @stats.RegistrationsThisWeek</p>
+            <!-- Pending Approvals Card -->
+            <div class="col-md-4 col-lg">
+                <div class="card metric-card h-100 border-0 shadow-sm clickable" @onclick="GoToManageEvents">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-muted mb-2">Pending Approvals</h6>
+                                <h2 class="mb-0 fw-bold text-warning">@pendingCount</h2>
+                                <small class="text-muted">Events awaiting review</small>
+                            </div>
+                            <div class="metric-icon bg-warning">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Logins Today -->
-            <div class="stat-card stat-info">
-                <div class="stat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                        <polyline points="10 17 15 12 10 7"></polyline>
-                        <line x1="15" y1="12" x2="3" y2="12"></line>
-                    </svg>
-                </div>
-                <div class="stat-content">
-                    <h3>Logins</h3>
-                    <p class="stat-number">@stats.LoginsToday</p>
-                    <p class="stat-label">Today | Week: @stats.LoginsThisWeek</p>
-                </div>
-            </div>
-
-            <!-- Flagged Users -->
-            <div class="stat-card stat-warning">
-                <div class="stat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
-                        <line x1="4" y1="22" x2="4" y2="15"></line>
-                    </svg>
-                </div>
-                <div class="stat-content">
-                    <h3>Flagged Users</h3>
-                    <p class="stat-number">@stats.FlaggedUsers</p>
-                    <p class="stat-label">Require attention</p>
+            <!-- Approved Events Card -->
+            <div class="col-md-4 col-lg">
+                <div class="card metric-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-muted mb-2">Approved Events</h6>
+                                <h2 class="mb-0 fw-bold text-success">@approvedCount</h2>
+                                <small class="text-muted">Active events</small>
+                            </div>
+                            <div class="metric-icon bg-success">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Banned Users -->
-            <div class="stat-card stat-danger">
-                <div class="stat-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
-                    </svg>
+            <!-- Total Users Card -->
+            <div class="col-md-4 col-lg">
+                <div class="card metric-card h-100 border-0 shadow-sm clickable" @onclick='() => activeTab = "users"'>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Users</h6>
+                                <h2 class="mb-0 fw-bold text-info">@totalUsers</h2>
+                                <small class="text-muted">Registered organizers</small>
+                            </div>
+                            <div class="metric-icon bg-info">
+                                <i class="bi bi-people"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-content">
-                    <h3>Banned Users</h3>
-                    <p class="stat-number">@stats.BannedUsers</p>
-                    <p class="stat-label">Restricted access</p>
+            </div>
+
+            <!-- Total Registrations Card -->
+            <div class="col-md-4 col-lg">
+                <div class="card metric-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Registrations</h6>
+                                <h2 class="mb-0 fw-bold text-purple">@totalRegistrations</h2>
+                                <small class="text-muted">Across all events</small>
+                            </div>
+                            <div class="metric-icon bg-purple">
+                                <i class="bi bi-ticket-perforated"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Last Updated Info -->
-        <div class="last-updated">
-            <p>Last updated: @lastUpdated.ToString("MMM dd, yyyy hh:mm tt")</p>
-            <button class="btn-refresh" @onclick="LoadDashboardData">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="23 4 23 10 17 10"></polyline>
-                    <polyline points="1 20 1 14 7 14"></polyline>
-                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                </svg>
-                Refresh
-            </button>
+        <!-- Tabs Section -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-bottom">
+                <ul class="nav nav-tabs card-header-tabs">
+                    <li class="nav-item">
+                        <button class="nav-link @(activeTab == "events" ? "active" : "")"
+                                @onclick='() => activeTab = "events"'>
+                            <i class="bi bi-calendar-event me-2"></i>Recent Events
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link @(activeTab == "users" ? "active" : "")"
+                                @onclick='() => activeTab = "users"'>
+                            <i class="bi bi-people me-2"></i>User Management
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                @if (activeTab == "events")
+                {
+                    <!-- Recent Events Table -->
+                    <h5 class="mb-3">Recent Event Submissions</h5>
+                    @if (recentEvents != null && recentEvents.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Event Title</th>
+                                        <th>Organizer</th>
+                                        <th>Category</th>
+                                        <th>Date Submitted</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var evt in recentEvents)
+                                    {
+                                        <tr>
+                                            <td>@evt.Title</td>
+                                            <td><small>@evt.CreatedBy</small></td>
+                                            <td>@evt.Category</td>
+                                            <td>@evt.DateCreated.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                <span class="badge @GetStatusBadgeClass(evt.Status) px-2 py-1">
+                                                    @evt.Status
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    @if (evt.Status == "Pending")
+                                                    {
+                                                        <button class="btn btn-success" @onclick="() => QuickApprove(evt.Id)">
+                                                            <i class="bi bi-check"></i>
+                                                        </button>
+                                                        <button class="btn btn-danger" @onclick="() => ShowQuickRejectModal(evt)">
+                                                            <i class="bi bi-x"></i>
+                                                        </button>
+                                                    }
+                                                    <a href="@($"/events/details/{evt.Id}")" class="btn btn-outline-secondary">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No recent events</p>
+                    }
+                }
+                else
+                {
+                    <!-- User Management Table -->
+                    <h5 class="mb-3">User Management</h5>
+                    @if (users != null && users.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Events Created</th>
+                                        <th>Join Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var user in users)
+                                    {
+                                        <tr>
+                                            <td>@user.Name</td>
+                                            <td><small>@user.Email</small></td>
+                                            <td>@user.EventCount events</td>
+                                            <td>@user.JoinDate.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                <span class="badge @(user.IsBanned ? "bg-danger" : "bg-success") px-2 py-1">
+                                                    @(user.IsBanned ? "Banned" : "Active")
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    @if (user.IsBanned)
+                                                    {
+                                                        <button class="btn btn-success" @onclick="() => UnbanUser(user.Email)" title="Unban User">
+                                                            <i class="bi bi-unlock"></i> Unban
+                                                        </button>
+                                                    }
+                                                    else
+                                                    {
+                                                        <button class="btn btn-danger" @onclick="() => ShowBanUserModal(user)" title="Ban User">
+                                                            <i class="bi bi-lock"></i> Ban
+                                                        </button>
+                                                    }
+                                                    <button class="btn btn-outline-primary" @onclick="() => ViewUserEvents(user.Email)" title="View Events">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No users found</p>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Bottom Info Cards -->
+        <div class="row g-4">
+            <!-- Upcoming Events -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-bottom">
+                        <h6 class="mb-0"><i class="bi bi-calendar-event me-2"></i>Upcoming Events</h6>
+                    </div>
+                    <div class="card-body">
+                        @if (upcomingEvents != null && upcomingEvents.Any())
+                        {
+                            <ul class="list-unstyled mb-0">
+                                @foreach (var evt in upcomingEvents.Take(5))
+                                {
+                                    <li class="mb-3 pb-3 border-bottom">
+                                        <div class="d-flex justify-content-between">
+                                            <strong>@evt.Title</strong>
+                                            <small class="text-muted">@evt.EventDate.ToString("MMM dd")</small>
+                                        </div>
+                                        <small class="text-muted">@evt.Location</small>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">No upcoming events</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Users -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-bottom">
+                        <h6 class="mb-0"><i class="bi bi-people me-2"></i>Recent Users</h6>
+                    </div>
+                    <div class="card-body">
+                        @if (recentUsers != null && recentUsers.Any())
+                        {
+                            <ul class="list-unstyled mb-0">
+                                @foreach (var user in recentUsers.Take(5))
+                                {
+                                    <li class="mb-3 pb-3 border-bottom">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>@user.Name</strong>
+                                                <br>
+                                                <small class="text-muted">@user.Email</small>
+                                            </div>
+                                            <small class="text-muted">@user.JoinDate.ToString("MMM dd")</small>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <p class="text-muted mb-0">No recent users</p>
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
     }
 </div>
 
+<!-- Quick Reject Modal -->
+@if (showQuickRejectModal && selectedEvent != null)
+{
+    <div class="modal-backdrop fade show" @onclick="CloseModals"></div>
+    <div class="modal fade show d-block" tabindex="-1" style="z-index: 1055;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Quick Reject Event</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseModals"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Event:</strong> @selectedEvent.Title</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Reason for Rejection (Required):</label>
+                        <textarea @bind="quickRejectReason" class="form-control" rows="3"
+                                  placeholder="Provide a reason..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModals">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="QuickReject"
+                            disabled="@string.IsNullOrWhiteSpace(quickRejectReason)">
+                        Reject Event
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Ban User Modal -->
+@if (showBanUserModal && selectedUser != null)
+{
+    <div class="modal-backdrop fade show" @onclick="CloseModals"></div>
+    <div class="modal fade show d-block" tabindex="-1" style="z-index: 1055;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Ban User</h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseModals"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to ban this user?</p>
+                    <div class="alert alert-warning">
+                        <strong>User:</strong> @selectedUser.Name (@selectedUser.Email)<br>
+                        <strong>Events Created:</strong> @selectedUser.EventCount<br><br>
+                        <small>This will prevent the user from logging in and hide their events from public view.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Reason for Ban (Optional):</label>
+                        <textarea @bind="banReason" class="form-control" rows="2"
+                                  placeholder="Reason for banning..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModals">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="BanUser">
+                        Ban User
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 <style>
-    .dashboard-container {
-        padding: 2rem;
-        max-width: 1400px;
-        margin: 0 auto;
+    .metric-card {
+        transition: transform 0.2s;
     }
 
-    .dashboard-header {
-        margin-bottom: 2rem;
-    }
-
-        .dashboard-header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1f2937;
-            margin: 0 0 0.5rem 0;
+        .metric-card.clickable {
+            cursor: pointer;
         }
 
-    .subtitle {
-        color: #6b7280;
-        font-size: 1rem;
-        margin: 0;
-    }
+            .metric-card.clickable:hover {
+                transform: translateY(-5px);
+            }
 
-    .loading-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 4rem 2rem;
-        gap: 1rem;
-    }
-
-    .spinner {
+    .metric-icon {
         width: 48px;
         height: 48px;
-        border: 4px solid #e5e7eb;
-        border-top-color: #3b82f6;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-
-    @@keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-
-    .error-message {
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        border-radius: 8px;
-        padding: 1.5rem;
-        text-align: center;
-        color: #dc2626;
-    }
-
-    .btn-retry {
-        margin-top: 1rem;
-        padding: 0.5rem 1.5rem;
-        background: #dc2626;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 500;
-    }
-
-        .btn-retry:hover {
-            background: #b91c1c;
-        }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .stat-card {
-        background: white;
         border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        display: flex;
-        gap: 1rem;
-        transition: transform 0.2s, box-shadow 0.2s;
-        border-left: 4px solid;
-    }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-    .stat-primary {
-        border-left-color: #3b82f6;
-    }
-
-    .stat-success {
-        border-left-color: #10b981;
-    }
-
-    .stat-info {
-        border-left-color: #06b6d4;
-    }
-
-    .stat-warning {
-        border-left-color: #f59e0b;
-    }
-
-    .stat-danger {
-        border-left-color: #ef4444;
-    }
-
-    .stat-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex-shrink: 0;
+        color: white;
+        font-size: 1.5rem;
     }
 
-    .stat-primary .stat-icon {
-        background: #dbeafe;
-        color: #3b82f6;
+    .bg-purple {
+        background-color: #6f42c1;
     }
 
-    .stat-success .stat-icon {
-        background: #d1fae5;
-        color: #10b981;
+    .text-purple {
+        color: #6f42c1;
     }
 
-    .stat-info .stat-icon {
-        background: #cffafe;
-        color: #06b6d4;
-    }
-
-    .stat-warning .stat-icon {
-        background: #fef3c7;
-        color: #f59e0b;
-    }
-
-    .stat-danger .stat-icon {
-        background: #fee2e2;
-        color: #ef4444;
-    }
-
-    .stat-content {
-        flex: 1;
-    }
-
-        .stat-content h3 {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #6b7280;
-            margin: 0 0 0.5rem 0;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #1f2937;
-        margin: 0 0 0.25rem 0;
-        line-height: 1;
-    }
-
-    .stat-label {
-        font-size: 0.875rem;
-        color: #6b7280;
-        margin: 0;
-    }
-
-    .stat-breakdown {
-        display: flex;
-        gap: 0.5rem;
-        margin-top: 0.75rem;
-        flex-wrap: wrap;
-    }
-
-    .badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .badge-admin {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-    .badge-user {
-        background: #e0e7ff;
-        color: #4338ca;
-    }
-
-    .last-updated {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-        background: #f9fafb;
-        border-radius: 8px;
-        font-size: 0.875rem;
-        color: #6b7280;
-    }
-
-        .last-updated p {
-            margin: 0;
-        }
-
-    .btn-refresh {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        border: none;
         cursor: pointer;
-        font-weight: 500;
-        color: #374151;
-        transition: all 0.2s;
     }
 
-        .btn-refresh:hover {
-            background: #f9fafb;
-            border-color: #d1d5db;
+        .nav-tabs .nav-link.active {
+            color: #0d6efd;
+            border-bottom: 3px solid #0d6efd;
+            font-weight: 600;
         }
 
-    @@media (max-width: 768px) {
-        .dashboard-container {
-            padding: 1rem;
-        }
-
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .last-updated {
-            flex-direction: column;
-            gap: 1rem;
-            text-align: center;
-        }
+    .modal-backdrop {
+        background-color: rgba(0,0,0,0.5);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1050;
     }
 </style>
 
 @code {
-    private DashboardStats stats = new();
+    private EventRegistrationContext context = default!;
+    private string? currentAdminEmail;
     private bool isLoading = true;
-    private string? errorMessage = null;
-    private DateTime lastUpdated = DateTime.Now;
+    private string activeTab = "events";
+
+    // Metrics
+    private int totalEvents = 0;
+    private int pendingCount = 0;
+    private int approvedCount = 0;
+    private int rejectedCount = 0;
+    private int totalUsers = 0;
+    private int totalRegistrations = 0;
+
+    // Data
+    private List<Event>? recentEvents;
+    private List<Event>? upcomingEvents;
+    private List<UserSummary>? users;
+    private List<UserSummary>? recentUsers;
+
+    // Modals
+    private bool showQuickRejectModal = false;
+    private bool showBanUserModal = false;
+    private Event? selectedEvent;
+    private UserSummary? selectedUser;
+    private string quickRejectReason = string.Empty;
+    private string banReason = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
+        context = DbFactory.CreateDbContext();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        currentAdminEmail = authState.User.Identity?.Name;
         await LoadDashboardData();
+        isLoading = false;
     }
 
     private async Task LoadDashboardData()
     {
-        isLoading = true;
-        errorMessage = null;
-        StateHasChanged();
+        // Load metrics
+        var allEvents = await context.Event.ToListAsync();
+        totalEvents = allEvents.Count;
+        pendingCount = allEvents.Count(e => e.Status == "Pending");
+        approvedCount = allEvents.Count(e => e.Status == "Approved");
+        rejectedCount = allEvents.Count(e => e.Status == "Rejected");
 
-        try
+        // Load recent events
+        recentEvents = await context.Event
+            .OrderByDescending(e => e.DateCreated)
+            .Take(10)
+            .ToListAsync();
+
+        // Load upcoming events
+        upcomingEvents = await context.Event
+            .Where(e => e.Status == "Approved" && e.EventDate >= DateTime.Now)
+            .OrderBy(e => e.EventDate)
+            .Take(5)
+            .ToListAsync();
+
+        // Load users data
+        var userEmails = await context.Event
+            .Select(e => e.CreatedBy)
+            .Distinct()
+            .ToListAsync();
+
+        users = new List<UserSummary>();
+        foreach (var email in userEmails.Where(e => !string.IsNullOrEmpty(e)))
         {
-            // TODO: Replace with actual service call
-            // stats = await UserService.GetDashboardStatsAsync();
+            var userEvents = allEvents.Where(e => e.CreatedBy == email).ToList();
+            var firstEvent = userEvents.OrderBy(e => e.DateCreated).FirstOrDefault();
 
-            // Mock data for now - replace with actual service implementation
-            await Task.Delay(500); // Simulate API call
-            stats = new DashboardStats
+            users.Add(new UserSummary
             {
-                TotalUsers = 1250,
-                TotalAdmins = 5,
-                TotalRegularUsers = 1245,
-                NewUsersLast7Days = 47,
-                LoginsToday = 234,
-                LoginsThisWeek = 1456,
-                RegistrationsToday = 8,
-                RegistrationsThisWeek = 47,
-                FlaggedUsers = 3,
-                BannedUsers = 12
-            };
+                Email = email!,
+                Name = email!.Split('@')[0], // Use email prefix as name
+                EventCount = userEvents.Count,
+                JoinDate = firstEvent?.DateCreated ?? DateTime.Now,
+                IsBanned = false // You'll need to add a Users table to track this properly
+            });
+        }
 
-            lastUpdated = DateTime.Now;
-        }
-        catch (Exception ex)
+        totalUsers = users.Count;
+        recentUsers = users.OrderByDescending(u => u.JoinDate).Take(5).ToList();
+
+        // Load total registrations (you'll need to implement based on your Registration/Ticket table)
+        totalRegistrations = 0; // Update this based on your data model
+    }
+
+    private void GoToManageEvents()
+    {
+        Navigation.NavigateTo("/admin/manage-events");
+    }
+
+    private async Task QuickApprove(int eventId)
+    {
+        var evt = await context.Event.FindAsync(eventId);
+        if (evt != null)
         {
-            errorMessage = $"Failed to load dashboard data: {ex.Message}";
-        }
-        finally
-        {
-            isLoading = false;
+            evt.Status = "Approved";
+            evt.ReviewedBy = currentAdminEmail;
+            evt.ReviewedDate = DateTime.Now;
+            evt.DateUpdated = DateTime.Now;
+            evt.UpdatedBy = currentAdminEmail;
+            await context.SaveChangesAsync();
+            await LoadDashboardData();
             StateHasChanged();
         }
     }
 
-    public class DashboardStats
+    private void ShowQuickRejectModal(Event evt)
     {
-        public int TotalUsers { get; set; }
-        public int TotalAdmins { get; set; }
-        public int TotalRegularUsers { get; set; }
-        public int NewUsersLast7Days { get; set; }
-        public int LoginsToday { get; set; }
-        public int LoginsThisWeek { get; set; }
-        public int RegistrationsToday { get; set; }
-        public int RegistrationsThisWeek { get; set; }
-        public int FlaggedUsers { get; set; }
-        public int BannedUsers { get; set; }
+        selectedEvent = evt;
+        quickRejectReason = string.Empty;
+        showQuickRejectModal = true;
+    }
+
+    private async Task QuickReject()
+    {
+        if (selectedEvent == null || string.IsNullOrWhiteSpace(quickRejectReason)) return;
+
+        var evt = await context.Event.FindAsync(selectedEvent.Id);
+        if (evt != null)
+        {
+            evt.Status = "Rejected";
+            evt.ReviewedBy = currentAdminEmail;
+            evt.ReviewedDate = DateTime.Now;
+            evt.RejectionReason = quickRejectReason.Trim();
+            evt.DateUpdated = DateTime.Now;
+            evt.UpdatedBy = currentAdminEmail;
+            await context.SaveChangesAsync();
+            CloseModals();
+            await LoadDashboardData();
+            StateHasChanged();
+        }
+    }
+
+    private void ShowBanUserModal(UserSummary user)
+    {
+        selectedUser = user;
+        banReason = string.Empty;
+        showBanUserModal = true;
+    }
+
+    private async Task BanUser()
+    {
+        if (selectedUser == null) return;
+
+        // Note: You'll need to implement proper user banning in your User table
+        // For now, this is a placeholder
+        Console.WriteLine($"Banning user: {selectedUser.Email}. Reason: {banReason}");
+
+        CloseModals();
+        StateHasChanged();
+    }
+
+    private async Task UnbanUser(string email)
+    {
+        // Note: You'll need to implement proper user unbanning in your User table
+        Console.WriteLine($"Unbanning user: {email}");
+        StateHasChanged();
+    }
+
+    private void ViewUserEvents(string email)
+    {
+        Navigation.NavigateTo($"/admin/user-events?email={email}");
+    }
+
+    private void CloseModals()
+    {
+        showQuickRejectModal = false;
+        showBanUserModal = false;
+        selectedEvent = null;
+        selectedUser = null;
+        quickRejectReason = string.Empty;
+        banReason = string.Empty;
+        StateHasChanged();
+    }
+
+    private string GetStatusBadgeClass(string? status)
+        => status switch
+        {
+            "Pending" => "bg-warning text-dark",
+            "Approved" => "bg-success text-white",
+            "Rejected" => "bg-danger text-white",
+            _ => "bg-secondary text-white"
+        };
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+
+    // Helper class for user data
+    public class UserSummary
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public int EventCount { get; set; }
+        public DateTime JoinDate { get; set; }
+        public bool IsBanned { get; set; }
     }
 }

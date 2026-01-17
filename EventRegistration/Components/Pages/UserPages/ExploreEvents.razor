@@ -45,7 +45,7 @@
                 </button>
                 <button class="events-filter-btn @(SelectedCategory == "Sports" ? "active" : "")"
                         @onclick="@(() => FilterByCategory("Sports"))">
-                    ⚽ Sports
+                    ⚽️ Sports
                 </button>
                 <button class="events-filter-btn @(SelectedCategory == "Entertainment" ? "active" : "")"
                         @onclick="@(() => FilterByCategory("Entertainment"))">
@@ -156,7 +156,8 @@
         try
         {
             var query = DbContext.Event
-                .Include(e => e.Tickets)  // This now works because Event has Tickets property
+                .Include(e => e.Tickets)
+                .Where(e => e.Status == "Approved")  // 👈 ONLY THIS LINE ADDED - Show only approved events
                 .AsQueryable();
 
             // Filter by category if specified

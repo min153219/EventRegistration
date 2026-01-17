@@ -12,7 +12,7 @@ namespace EventRegistration.Configurations.Entities
             builder.HasData(
             new EventRegistrationUser
             {
-                Id = "1",
+                Id = "3274395e-ed85-4775-a732-6e2166b6844d",
                 Email = "admin@localhost.com",
                 NormalizedEmail = "ADMIN@LOCALHOST.COM",
                 FirstName = "Admin",

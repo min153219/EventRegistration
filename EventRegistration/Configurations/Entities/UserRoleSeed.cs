@@ -11,7 +11,7 @@ namespace EventRegistration.Configurations.Entities
             new IdentityUserRole<string>
             {
                 RoleId = "1",
-                UserId = "1"
+                UserId = "3274395e-ed85-4775-a732-6e2166b6844d"
             }
             );
         }

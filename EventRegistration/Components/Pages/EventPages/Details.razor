@@ -1,0 +1,259 @@
+﻿@page "/events/details/{id:int}"
+@using Microsoft.EntityFrameworkCore
+@using EventRegistration.Domain
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IDbContextFactory<EventRegistration.Data.EventRegistrationContext> DbFactory
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Event Details</PageTitle>
+
+<div class="container mt-4">
+    @if (selectedEvent is null)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2"><em>Loading event details...</em></p>
+        </div>
+    }
+    else
+    {
+        <div class="row mb-3">
+            <div class="col">
+                <h1 class="mb-2">@selectedEvent.Title</h1>
+                <span class="badge @GetStatusBadgeClass(selectedEvent.Status) px-3 py-2 fs-6">
+                    @if (selectedEvent.Status == "Pending")
+                    {
+                        <i class="bi bi-clock-history me-1"></i>
+                    }
+                    else if (selectedEvent.Status == "Approved")
+                    {
+                        <i class="bi bi-check-circle me-1"></i>
+                    }
+                    else if (selectedEvent.Status == "Rejected")
+                    {
+                        <i class="bi bi-x-circle me-1"></i>
+                    }
+                    @selectedEvent.Status
+                </span>
+            </div>
+            <div class="col-auto">
+                @if (canEdit)
+                {
+                    <a href="@($"/events/edit/{selectedEvent.Id}")" class="btn btn-primary me-2">
+                        <i class="bi bi-pencil"></i> Edit Event
+                    </a>
+                }
+                <a href="/events" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Event Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong><i class="bi bi-calendar-event me-2"></i>Event Date:</strong>
+                                <p class="mb-0">@selectedEvent.EventDate.ToString("MMMM dd, yyyy")</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong><i class="bi bi-tag me-2"></i>Type:</strong>
+                                <p class="mb-0">
+                                    <span class="badge bg-info text-dark">@selectedEvent.Type</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong><i class="bi bi-geo-alt me-2"></i>Location:</strong>
+                                <p class="mb-0">@selectedEvent.Location</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong><i class="bi bi-people me-2"></i>Total Capacity:</strong>
+                                <p class="mb-0">@selectedEvent.TotalCapacity</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <strong><i class="bi bi-folder me-2"></i>Category:</strong>
+                                <p class="mb-0">@selectedEvent.Category</p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <strong><i class="bi bi-text-paragraph me-2"></i>Description:</strong>
+                                <p class="text-muted">@selectedEvent.Description</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @if (canEdit)
+                {
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="@($"/events/{selectedEvent.Id}/tickets")" class="btn btn-outline-success">
+                                    <i class="bi bi-ticket-perforated"></i> Manage Tickets
+                                </a>
+                                <a href="@($"/events/{selectedEvent.Id}/payments")" class="btn btn-outline-info">
+                                    <i class="bi bi-cash-stack"></i> View Payments
+                                </a>
+                                <a href="@($"/events/edit/{selectedEvent.Id}")" class="btn btn-outline-primary">
+                                    <i class="bi bi-pencil"></i> Edit Event
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Audit Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <strong>Created By:</strong>
+                            <p class="mb-0 text-muted">@selectedEvent.CreatedBy</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Date Created:</strong>
+                            <p class="mb-0 text-muted">@selectedEvent.DateCreated.ToString("MMM dd, yyyy 'at' h:mm tt")</p>
+                        </div>
+
+                        @if (selectedEvent.DateUpdated != DateTime.MinValue)
+                        {
+                            <div class="mb-3">
+                                <strong>Last Updated By:</strong>
+                                <p class="mb-0 text-muted">@selectedEvent.UpdatedBy</p>
+                            </div>
+                            <div class="mb-0">
+                                <strong>Last Updated:</strong>
+                                <p class="mb-0 text-muted">@selectedEvent.DateUpdated.ToString("MMM dd, yyyy 'at' h:mm tt")</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-muted fst-italic">
+                                <small>This event has not been updated yet.</small>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="card shadow-sm">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <span class="badge @GetStatusBadgeClass(selectedEvent.Status) px-4 py-3 fs-5">
+                                @if (selectedEvent.Status == "Pending")
+                                {
+                                    <i class="bi bi-clock-history me-2"></i>
+                                }
+                                else if (selectedEvent.Status == "Approved")
+                                {
+                                    <i class="bi bi-check-circle me-2"></i>
+                                }
+                                else if (selectedEvent.Status == "Rejected")
+                                {
+                                    <i class="bi bi-x-circle me-2"></i>
+                                }
+                                @selectedEvent.Status
+                            </span>
+
+                            @if (selectedEvent.Status == "Pending")
+                            {
+                                <p class="text-muted mt-3 mb-0">
+                                    <small>This event is awaiting approval from an administrator.</small>
+                                </p>
+                            }
+                            else if (selectedEvent.Status == "Approved")
+                            {
+                                <p class="text-muted mt-3 mb-0">
+                                    <small>This event has been approved and is active.</small>
+                                </p>
+                            }
+                            else if (selectedEvent.Status == "Rejected")
+                            {
+                                <p class="text-muted mt-3 mb-0">
+                                    <small>This event has been rejected.</small>
+                                </p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 8px;
+    }
+
+    .card-header {
+        border-radius: 8px 8px 0 0 !important;
+    }
+
+    strong {
+        color: #495057;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Event? selectedEvent;
+    private bool canEdit = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        selectedEvent = await context.Event
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (selectedEvent is null)
+        {
+            NavigationManager.NavigateTo("/events");
+            return;
+        }
+
+        // Check if user can edit this event
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var currentUserEmail = authState.User.Identity?.Name;
+        var isAdmin = authState.User.IsInRole("Administrator");
+
+        canEdit = isAdmin || selectedEvent.CreatedBy == currentUserEmail;
+    }
+
+    private string GetStatusBadgeClass(string? status)
+        => status switch
+        {
+            "Pending" => "bg-warning text-dark",
+            "Approved" => "bg-success text-white",
+            "Rejected" => "bg-danger text-white",
+            _ => "bg-secondary text-white"
+        };
+}

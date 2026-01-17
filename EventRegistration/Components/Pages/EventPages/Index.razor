@@ -1,0 +1,243 @@
+﻿@page "/events"
+@rendermode InteractiveServer
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using EventRegistration.Domain
+@using EventRegistration.Data
+@using Microsoft.AspNetCore.Components.Authorization
+@implements IAsyncDisposable
+@inject IDbContextFactory<EventRegistrationContext> DbFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>My Events</PageTitle>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>@(isAdmin ? "All Events" : "My Events")</h1>
+            <p class="text-muted">
+                @if (isAdmin)
+                {
+                    <span>View all events in the system. Use <a href="/admin/manage-events">Manage Events</a> to approve/reject events.</span>
+                }
+                else
+                {
+                    <span>View and manage your created events</span>
+                }
+            </p>
+        </div>
+        <div class="col-auto">
+            @if (!isAdmin)
+            {
+                <a href="/events/create" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i>Create New Event
+                </a>
+            }
+            else
+            {
+                <a href="/admin/manage-events" class="btn btn-warning">
+                    <i class="bi bi-shield-check me-1"></i>Manage Events
+                </a>
+            }
+        </div>
+    </div>
+
+    @if (events == null || !events.Any())
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            @if (isAdmin)
+            {
+                <span>No events found in the system.</span>
+            }
+            else
+            {
+                <span>You haven't created any events yet. <a href="/events/create">Create your first event</a>!</span>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <QuickGrid TGridItem="Event" Class="table table-hover mb-0" Items="filteredEvents">
+                    <TemplateColumn Title="Event Title" Sortable="true" SortBy="@(GridSort<Event>.ByAscending(e => e.Title))" Context="e">
+                        @if (!isAdmin && e.CreatedBy == currentUserEmail)
+                        {
+                            <a href="@($"/events/{e.Id}/tickets")" class="text-decoration-none fw-semibold text-primary event-title-link">
+                                @e.Title
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="fw-semibold">@e.Title</span>
+                        }
+                    </TemplateColumn>
+
+                    <PropertyColumn Property="e => e.Type" Sortable="true" />
+                    <PropertyColumn Property="e => e.EventDate" Format="MMM dd, yyyy" Sortable="true" Title="Event Date" />
+                    <PropertyColumn Property="e => e.Location" />
+                    <PropertyColumn Property="e => e.Category" Sortable="true" />
+
+                    @if (isAdmin)
+                    {
+                        <PropertyColumn Property="e => e.CreatedBy" Title="Created By" Sortable="true" />
+                    }
+
+                    <PropertyColumn Property="e => e.DateCreated" Format="MMM dd, yyyy" Title="Created" Sortable="true" />
+
+                    <TemplateColumn Title="Status" Context="e">
+                        <span class="badge @GetStatusBadgeClass(e.Status) px-3 py-2">
+                            @if (e.Status == "Pending")
+                            {
+                                <i class="bi bi-clock-history me-1"></i>
+                            }
+                            else if (e.Status == "Approved")
+                            {
+                                <i class="bi bi-check-circle me-1"></i>
+                            }
+                            else if (e.Status == "Rejected")
+                            {
+                                <i class="bi bi-x-circle me-1"></i>
+                            }
+                            @e.Status
+                        </span>
+                    </TemplateColumn>
+
+                    <TemplateColumn Title="Actions" Context="e">
+                        <div class="btn-group btn-group-sm" role="group">
+                            @if (isAdmin)
+                            {
+                                <!-- Admin can only view details -->
+                                <a href="@($"/events/details/{e.Id}")" class="btn btn-outline-secondary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <a href="/admin/manage-events" class="btn btn-outline-warning">
+                                    <i class="bi bi-shield-check"></i> Manage
+                                </a>
+                            }
+                            else if (e.CreatedBy == currentUserEmail)
+                            {
+                                <!-- Event creator can edit/delete/manage -->
+                                @if (e.Status == "Pending")
+                                {
+                                    <a href="@($"/events/edit/{e.Id}")" class="btn btn-outline-primary">
+                                        <i class="bi bi-pencil"></i> Edit
+                                    </a>
+                                }
+                                <a href="@($"/events/{e.Id}/tickets")" class="btn btn-outline-success">
+                                    <i class="bi bi-ticket-perforated"></i> Tickets
+                                </a>
+                                <a href="@($"/events/{e.Id}/payments")" class="btn btn-outline-info">
+                                    <i class="bi bi-cash-stack"></i> Payments
+                                </a>
+                                <a href="@($"/events/delete/{e.Id}")" class="btn btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Delete
+                                </a>
+                                <a href="@($"/events/details/{e.Id}")" class="btn btn-outline-secondary">
+                                    <i class="bi bi-eye"></i> Details
+                                </a>
+                            }
+                        </div>
+                    </TemplateColumn>
+                </QuickGrid>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+        padding: 1rem;
+    }
+
+    .table td {
+        vertical-align: middle;
+        padding: 1rem;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .btn-group-sm > .btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .event-title-link {
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+        .event-title-link:hover {
+            color: #0056b3 !important;
+            text-decoration: underline !important;
+        }
+</style>
+
+@code {
+    private EventRegistrationContext context = default!;
+    private string? currentUserEmail;
+    private bool isAdmin = false;
+    private List<Event>? events;
+    private IQueryable<Event>? filteredEvents;
+
+    protected override async Task OnInitializedAsync()
+    {
+        context = DbFactory.CreateDbContext();
+
+        // Get current user info
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        currentUserEmail = authState.User.Identity?.Name;
+        isAdmin = authState.User.IsInRole("Administrator");
+
+        // Redirect admins directly to Manage Events page
+        if (isAdmin)
+        {
+            Navigation.NavigateTo("/admin/manage-events", forceLoad: false);
+            return;
+        }
+
+        // Load events based on role (only for regular users now)
+        await LoadEvents();
+    }
+
+    private async Task LoadEvents()
+    {
+        if (isAdmin)
+        {
+            // Admin sees ALL events
+            events = await context.Event
+                .AsNoTracking()
+                .OrderByDescending(e => e.DateCreated)
+                .ToListAsync();
+        }
+        else
+        {
+            // Regular users see only THEIR events (excluding Rejected)
+            events = await context.Event
+                .AsNoTracking()
+                .Where(e => e.CreatedBy == currentUserEmail && e.Status != "Rejected")
+                .OrderByDescending(e => e.DateCreated)
+                .ToListAsync();
+        }
+
+        filteredEvents = events.AsQueryable();
+    }
+
+    private string GetStatusBadgeClass(string? status)
+        => status switch
+        {
+            "Pending" => "bg-warning text-dark",
+            "Approved" => "bg-success text-white",
+            "Rejected" => "bg-danger text-white",
+            _ => "bg-secondary text-white"
+        };
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}
