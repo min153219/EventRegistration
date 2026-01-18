@@ -1,6 +1,10 @@
 ﻿@page "/"
 @rendermode InteractiveServer
-@inject NavigationManager Navigation     
+@using EventRegistration.Data
+@using EventRegistration.Domain
+@using Microsoft.EntityFrameworkCore
+@inject EventRegistrationContext DbContext
+@inject NavigationManager Navigation
 
 <PageTitle>Eventora - Home</PageTitle>
 
@@ -16,22 +20,22 @@
     <p class="section-subtitle">Find the perfect event for you from various categories</p>
 
     <div class="category-grid">
-        <div class="category-card" @onclick="@(() => NavigateToCategory("Music"))">     
+        <div class="category-card" @onclick="@(() => NavigateToCategory("Music"))">
             <div class="category-icon">🎵</div>
             <h3>Music & Concerts</h3>
             <p>Live performances, festivals, and music events</p>
         </div>
-        <div class="category-card" @onclick="@(() => NavigateToCategory("Educational"))">     
+        <div class="category-card" @onclick="@(() => NavigateToCategory("Educational"))">
             <div class="category-icon">📚</div>
             <h3>Educational</h3>
             <p>Webinars, workshops, and learning sessions</p>
         </div>
-        <div class="category-card" @onclick="@(() => NavigateToCategory("Arts"))">     
+        <div class="category-card" @onclick="@(() => NavigateToCategory("Arts"))">
             <div class="category-icon">🎨</div>
             <h3>Arts & Culture</h3>
             <p>Exhibitions, theater, and cultural events</p>
         </div>
-        <div class="category-card" @onclick="@(() => NavigateToCategory("Professional"))">     
+        <div class="category-card" @onclick="@(() => NavigateToCategory("Professional"))">
             <div class="category-icon">💼</div>
             <h3>Professional</h3>
             <p>Networking, conferences, and career events</p>
@@ -39,102 +43,127 @@
     </div>
 </section>
 
-<!-- Highlighted Events -->
+<!-- Highlighted Events - Now Dynamic! -->
 <section class="highlighted-events">
     <div class="container">
         <h2 class="section-title">Featured Events</h2>
         <p class="section-subtitle">Check out our handpicked events happening soon</p>
 
-        <div class="events-grid">
-            <div class="event-card">
-                <div class="event-image">🎸</div>
-                <div class="event-content">
-                    <span class="event-tag">Music</span>
-                    <h3>Summer Music Festival 2026</h3>
-                    <p class="event-details">📅 July 15, 2026 | 📍 Central Park</p>
-                    <p class="event-price">$45.00</p>
-                    <button class="btn-register" onclick="showModal()">Register Now</button>
-                </div>
+        @if (isLoading)
+        {
+            <div class="loading-message">
+                <p>Loading featured events...</p>
             </div>
-
-            <div class="event-card">
-                <div class="event-image">💻</div>
-                <div class="event-content">
-                    <span class="event-tag">Educational</span>
-                    <h3>Web Development Bootcamp</h3>
-                    <p class="event-details">📅 Feb 1, 2026 | 📍 Online</p>
-                    <p class="event-price">$29.99</p>
-                    <button class="btn-register" onclick="showModal()">Register Now</button>
-                </div>
+        }
+        else if (featuredEvents != null && featuredEvents.Any())
+        {
+            <div class="events-grid">
+                @foreach (var evt in featuredEvents)
+                {
+                    <div class="event-card">
+                        <div class="event-image">@GetCategoryIcon(evt.Category)</div>
+                        <div class="event-content">
+                            <span class="event-tag">@evt.Category</span>
+                            <h3>@evt.Title</h3>
+                            <p class="event-details">📅 @evt.EventDate.ToString("MMM dd, yyyy") | 📍 @evt.Location</p>
+                            <p class="event-price">
+                                @if (evt.Tickets != null && evt.Tickets.Any())
+                                {
+                                    var minPrice = evt.Tickets.Min(t => t.Price);
+                                    if (minPrice == 0)
+                                    {
+                                        <text>Free</text>
+                                    }
+                                    else
+                                    {
+                                        <text>$@minPrice.ToString("F2")</text>
+                                    }
+                                }
+                                else
+                                {
+                                    <text>Free</text>
+                                }
+                            </p>
+                            <button class="btn-register" @onclick="@(() => NavigateToEvent(evt.Id))">
+                                Register Now
+                            </button>
+                        </div>
+                    </div>
+                }
             </div>
-
-            <div class="event-card">
-                <div class="event-image">🎭</div>
-                <div class="event-content">
-                    <span class="event-tag">Arts</span>
-                    <h3>Modern Art Exhibition</h3>
-                    <p class="event-details">📅 Jan 20, 2026 | 📍 City Gallery</p>
-                    <p class="event-price">Free</p>
-                    <button class="btn-register" onclick="showModal()">Register Now</button>
-                </div>
+        }
+        else
+        {
+            <div class="no-events-message">
+                <p>No featured events available at the moment.</p>
             </div>
-
-            <div class="event-card">
-                <div class="event-image">🎤</div>
-                <div class="event-content">
-                    <span class="event-tag">Professional</span>
-                    <h3>Tech Talks 2026</h3>
-                    <p class="event-details">📅 Mar 10, 2026 | 📍 Convention Center</p>
-                    <p class="event-price">$75.00</p>
-                    <button class="btn-register" onclick="showModal()">Register Now</button>
-                </div>
-            </div>
-
-            <div class="event-card">
-                <div class="event-image">🎬</div>
-                <div class="event-content">
-                    <span class="event-tag">Entertainment</span>
-                    <h3>Indie Film Festival</h3>
-                    <p class="event-details">📅 Apr 5, 2026 | 📍 Downtown Theater</p>
-                    <p class="event-price">$35.00</p>
-                    <button class="btn-register" onclick="showModal()">Register Now</button>
-                </div>
-            </div>
-
-            <div class="event-card">
-                <div class="event-image">🏃</div>
-                <div class="event-content">
-                    <span class="event-tag">Sports</span>
-                    <h3>City Marathon 2026</h3>
-                    <p class="event-details">📅 May 12, 2026 | 📍 City Streets</p>
-                    <p class="event-price">$50.00</p>
-                    <button class="btn-register" onclick="showModal()">Register Now</button>
-                </div>
-            </div>
-        </div>
+        }
     </div>
 </section>
-
-<!-- Login Modal -->
-<div class="modal" id="loginModal">
-    <div class="modal-content">
-        <h2>Join Eventora!</h2>
-        <p>Please log in or create an account to register for events and start your journey</p>
-        <div class="modal-buttons">
-            <button class="btn-modal btn-modal-login">Log In</button>
-            <button class="btn-modal btn-modal-signup">Sign Up</button>
-        </div>
-    </div>
-</div>
 
 <!-- Footer -->
 <footer class="footer">
     <p>&copy; 2026 Eventora. All rights reserved. | Making events accessible for everyone</p>
 </footer>
 
-@code {     
+@code {
+    private List<Event> featuredEvents = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFeaturedEvents();
+    }
+
+    private async Task LoadFeaturedEvents()
+    {
+        isLoading = true;
+
+        try
+        {
+            // Load featured events from database
+            featuredEvents = await DbContext.Event
+                .Include(e => e.Tickets)
+                .Where(e => e.IsFeatured == true && e.Status == "Approved")
+                .OrderBy(e => e.EventDate)
+                .Take(6) // Show up to 6 featured events
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading featured events: {ex.Message}");
+            featuredEvents = new List<Event>();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
     private void NavigateToCategory(string category)
     {
         Navigation.NavigateTo($"/explore-events?category={category}");
+    }
+
+    private void NavigateToEvent(int eventId)
+    {
+        Navigation.NavigateTo($"/event-details/{eventId}");
+    }
+
+    private string GetCategoryIcon(string? category)
+    {
+        if (string.IsNullOrEmpty(category))
+            return "📅";
+
+        return category switch
+        {
+            "Music" => "🎸",
+            "Educational" => "💻",
+            "Arts" => "🎭",
+            "Professional" => "🎤",
+            "Entertainment" => "🎬",
+            "Sports" => "🏃",
+            _ => "📅"
+        };
     }
 }
