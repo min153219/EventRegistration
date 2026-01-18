@@ -4,10 +4,11 @@
 @using EventRegistration.Domain
 @using EventRegistration.Data
 @using Microsoft.AspNetCore.Components.Authorization
-@attribute [Authorize(Roles = "Administrator")]
 @implements IAsyncDisposable
 @inject IDbContextFactory<EventRegistrationContext> DbFactory
 @inject AuthenticationStateProvider AuthenticationStateProvider
+
+<link href="/ManageEvents.razor.css" rel="stylesheet" />
 
 <PageTitle>Manage Events - Admin</PageTitle>
 
@@ -226,57 +227,6 @@
         </div>
     </div>
 }
-
-<style>
-    .table {
-        background-color: white;
-        border: 1px solid #dee2e6;
-    }
-
-        .table th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            border-bottom: 2px solid #dee2e6;
-            padding: 0.75rem;
-            vertical-align: middle;
-            white-space: nowrap;
-        }
-
-        .table td {
-            vertical-align: middle;
-            padding: 0.75rem;
-        }
-
-    .table-hover tbody tr:hover {
-        background-color: #f8f9fa;
-    }
-
-    .nav-tabs .nav-link {
-        color: #495057;
-        cursor: pointer;
-        border: none;
-    }
-
-        .nav-tabs .nav-link.active {
-            font-weight: 600;
-            border-bottom: 3px solid #0d6efd;
-        }
-
-    .modal-backdrop {
-        background-color: rgba(0,0,0,0.5);
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 1050;
-    }
-
-    .btn-sm {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-    }
-</style>
 
 @code {
     private EventRegistrationContext context = default!;

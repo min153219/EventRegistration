@@ -4,37 +4,135 @@
 @inject IDbContextFactory<EventRegistration.Data.EventRegistrationContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Details</PageTitle>
+<PageTitle>Ticket Details</PageTitle>
 
-<h1>Details</h1>
+<link rel="stylesheet" href="Details.razor.css" />
 
-<div>
-    <h2>Ticket</h2>
-    <hr />
+<div class="details-container">
     @if (ticket is null)
     {
-        <p><em>Loading...</em></p>
+        <div class="loading-container">
+            <div class="spinner"></div>
+            <p class="loading-text"><em>Loading ticket details...</em></p>
+        </div>
     }
-    else {
-        <dl class="row">
-            <dt class="col-sm-2">Price</dt>
-            <dd class="col-sm-10">@ticket.Price</dd>
-            <dt class="col-sm-2">Type</dt>
-            <dd class="col-sm-10">@ticket.Type</dd>
-            <dt class="col-sm-2">EventId</dt>
-            <dd class="col-sm-10">@ticket.EventId</dd>
-            <dt class="col-sm-2">DateCreated</dt>
-            <dd class="col-sm-10">@ticket.DateCreated</dd>
-            <dt class="col-sm-2">DateUpdated</dt>
-            <dd class="col-sm-10">@ticket.DateUpdated</dd>
-            <dt class="col-sm-2">CreatedBy</dt>
-            <dd class="col-sm-10">@ticket.CreatedBy</dd>
-            <dt class="col-sm-2">UpdatedBy</dt>
-            <dd class="col-sm-10">@ticket.UpdatedBy</dd>
-        </dl>
-        <div>
-            <a href="@($"/tickets/edit?id={ticket.Id}")">Edit</a> |
-            <a href="@($"/events/{ticket.EventId}/tickets")">Back To List</a>
+    else
+    {
+        <div class="details-header">
+            <div class="header-content">
+                <h1 class="header-title">Ticket Details</h1>
+                <span class="badge badge-info">@ticket.Type</span>
+            </div>
+            <div class="header-actions">
+                <a href="@($"/tickets/edit?id={ticket.Id}")" class="btn btn-primary">
+                    Edit Ticket
+                </a>
+                <a href="@($"/events/{ticket.EventId}/tickets")" class="btn btn-secondary">
+                    Back to List
+                </a>
+            </div>
+        </div>
+
+        <div class="details-layout">
+            <div>
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <h5>Ticket Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-row">
+                            <div class="info-item">
+                                <strong class="info-label">Price:</strong>
+                                <p class="info-value">$@ticket.Price.ToString("0.00")</p>
+                            </div>
+                            <div class="info-item">
+                                <strong class="info-label">Type:</strong>
+                                <p class="info-value">
+                                    <span class="badge badge-info">@ticket.Type</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="info-row">
+                            <div class="info-item" style="grid-column: 1 / -1;">
+                                <strong class="info-label">Event ID:</strong>
+                                <p class="info-value">@ticket.EventId</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header card-header-success">
+                        <h5>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-actions">
+                            <a href="@($"/tickets/edit?id={ticket.Id}")" class="btn btn-outline-primary">
+                                Edit Ticket
+                            </a>
+                            <a href="@($"/tickets/delete?id={ticket.Id}")" class="btn btn-outline-primary">
+                               Delete Ticket
+                            </a>
+                            <a href="@($"/events/{ticket.EventId}/tickets")" class="btn btn-outline-info">
+                               View All Tickets
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <div class="card-header card-header-secondary">
+                        <h5>Audit Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="audit-item">
+                            <strong class="audit-label">Created By:</strong>
+                            <p class="audit-value">@ticket.CreatedBy</p>
+                        </div>
+                        <div class="audit-item">
+                            <strong class="audit-label">Date Created:</strong>
+                            <p class="audit-value">@ticket.DateCreated.ToString("MMM dd, yyyy 'at' h:mm tt")</p>
+                        </div>
+
+                        @if (ticket.DateUpdated != DateTime.MinValue && ticket.DateUpdated != ticket.DateCreated)
+                        {
+                            <div class="audit-item">
+                                <strong class="audit-label">Last Updated By:</strong>
+                                <p class="audit-value">@ticket.UpdatedBy</p>
+                            </div>
+                            <div class="audit-item">
+                                <strong class="audit-label">Last Updated:</strong>
+                                <p class="audit-value">@ticket.DateUpdated.ToString("MMM dd, yyyy 'at' h:mm tt")</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="audit-empty">
+                                This ticket has not been updated yet.
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header card-header-warning">
+                        <h5>Pricing</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="status-display">
+                            <div style="font-size: 2.5rem; font-weight: 700; color: #059669; margin-bottom: 0.5rem;">
+                                $@ticket.Price.ToString("0.00")
+                            </div>
+                            <p class="status-message">
+                                Current ticket price
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     }
 </div>

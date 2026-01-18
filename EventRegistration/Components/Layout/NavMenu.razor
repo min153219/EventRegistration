@@ -63,7 +63,7 @@
                     <div class="nav-item px-3 nav-right">
                         <form action="Account/Logout" method="post">
                             <AntiforgeryToken />
-                            <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                            <input type="hidden" name="ReturnUrl" value="Account/Login" />
                             <button type="submit" class="nav-link">
                                 <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
                             </button>
@@ -83,15 +83,37 @@
                             <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
                         </NavLink>
                     </div>
+                    
                 </NotAuthorized>
             </AuthorizeView>
+            <div class="nav-item px-3 nav-right">
+                <NavLink class="nav-link" href="About">
+                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span> About
+                </NavLink>
+            </div>
         </nav>
     </div>
 </header>
 
 @code {
-    private string? currentUrl;
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
 
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}
+
+@* @code {
+    private string? currentUrl;
     protected override void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
@@ -108,4 +130,6 @@
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
+
 }
+} *@

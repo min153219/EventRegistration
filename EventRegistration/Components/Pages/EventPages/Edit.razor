@@ -8,9 +8,11 @@
 
 <PageTitle>Edit Event</PageTitle>
 
-<div class="container mt-4">
-    <h1>Edit Event</h1>
-    <hr />
+<link rel="stylesheet" href="Edit.razor.css" />
+
+<div class="edit-container">
+    <h1 class="page-title">Edit Event</h1>
+    <hr class="divider" />
 
     @if (isUnauthorized)
     {
@@ -23,126 +25,124 @@
     else if (cannotEdit)
     {
         <div class="alert alert-warning">
-            <h4><i class="bi bi-lock me-2"></i>Cannot Edit</h4>
+            <h4>Cannot Edit</h4>
             <p>This event has been <strong>@selectedEvent?.Status</strong> and cannot be edited. Only events with "Pending" status can be modified.</p>
             <a href="/events" class="btn btn-primary">Back to Events</a>
         </div>
     }
     else if (selectedEvent is null)
     {
-        <div class="text-center">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-2"><em>Loading event...</em></p>
+        <div class="loading-container">
+            <div class="spinner"></div>
+            <p class="loading-text"><em>Loading event...</em></p>
         </div>
     }
     else
     {
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <EditForm method="post" Model="@selectedEvent" OnValidSubmit="@UpdateEvent" FormName="EditEventForm" Enhance>
-                            <DataAnnotationsValidator />
-                            <ValidationSummary class="alert alert-danger" role="alert" />
+        <div class="edit-layout">
+            <div class="form-card">
+                <EditForm method="post" Model="@selectedEvent" OnValidSubmit="@UpdateEvent" FormName="EditEventForm" Enhance>
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="validation-summary" role="alert" />
 
-                            <input type="hidden" name="selectedEvent.Id" value="@selectedEvent.Id" />
+                    <input type="hidden" name="selectedEvent.Id" value="@selectedEvent.Id" />
 
-                            <div class="mb-3">
-                                <label for="title" class="form-label">Title:</label>
-                                <InputText id="title" @bind-Value="selectedEvent.Title" class="form-control" name="selectedEvent.Title" />
-                                <ValidationMessage For="() => selectedEvent.Title" class="text-danger" />
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="type" class="form-label">Type:</label>
-                                    <InputSelect id="type" @bind-Value="selectedEvent.Type" class="form-control" name="selectedEvent.Type">
-                                        <option value="">Select Type</option>
-                                        <option value="Physical">Physical</option>
-                                        <option value="Virtual">Virtual</option>
-                                        <option value="Hybrid">Hybrid</option>
-                                    </InputSelect>
-                                    <ValidationMessage For="() => selectedEvent.Type" class="text-danger" />
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label for="eventdate" class="form-label">Event Date:</label>
-                                    <InputDate id="eventdate" @bind-Value="selectedEvent.EventDate" class="form-control" name="selectedEvent.EventDate" />
-                                    <ValidationMessage For="() => selectedEvent.EventDate" class="text-danger" />
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="location" class="form-label">Location:</label>
-                                    <InputText id="location" @bind-Value="selectedEvent.Location" class="form-control" name="selectedEvent.Location" />
-                                    <ValidationMessage For="() => selectedEvent.Location" class="text-danger" />
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label for="totalcapacity" class="form-label">Total Capacity:</label>
-                                    <InputNumber id="totalcapacity" @bind-Value="selectedEvent.TotalCapacity" class="form-control" name="selectedEvent.TotalCapacity" />
-                                    <ValidationMessage For="() => selectedEvent.TotalCapacity" class="text-danger" />
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="category" class="form-label">Category:</label>
-                                <InputText id="category" @bind-Value="selectedEvent.Category" class="form-control" name="selectedEvent.Category" />
-                                <ValidationMessage For="() => selectedEvent.Category" class="text-danger" />
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="description" class="form-label">Description:</label>
-                                <InputTextArea id="description" @bind-Value="selectedEvent.Description" class="form-control" rows="4" name="selectedEvent.Description" />
-                                <ValidationMessage For="() => selectedEvent.Description" class="text-danger" />
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label for="createdby" class="form-label">Created By:</label>
-                                    <input id="createdby" value="@selectedEvent.CreatedBy" class="form-control" disabled />
-                                </div>
-
-                                <div class="col-md-4 mb-3">
-                                    <label for="datecreated" class="form-label">Date Created:</label>
-                                    <input id="datecreated" value="@selectedEvent.DateCreated.ToString("yyyy-MM-dd")" class="form-control" disabled />
-                                </div>
-
-                                <div class="col-md-4 mb-3">
-                                    <label for="status" class="form-label">Status:</label>
-                                    <input id="status" value="@selectedEvent.Status" class="form-control" disabled />
-                                </div>
-                            </div>
-
-                            @if (!string.IsNullOrEmpty(selectedEvent.UpdatedBy))
-                            {
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="updatedby" class="form-label">Last Updated By:</label>
-                                        <input id="updatedby" value="@selectedEvent.UpdatedBy" class="form-control" disabled />
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <label for="dateupdated" class="form-label">Last Updated:</label>
-                                        <input id="dateupdated" value="@selectedEvent.DateUpdated.ToString("yyyy-MM-dd")" class="form-control" disabled />
-                                    </div>
-                                </div>
-                            }
-
-                            <div class="d-flex gap-2 mt-4">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-save"></i> Save Changes
-                                </button>
-                                <a href="/events" class="btn btn-secondary">
-                                    <i class="bi bi-x-circle"></i> Cancel
-                                </a>
-                            </div>
-                        </EditForm>
+                    <div class="form-group full-width">
+                        <label for="title" class="form-label">Title:</label>
+                        <InputText id="title" @bind-Value="selectedEvent.Title" class="form-control" name="selectedEvent.Title" />
+                        <ValidationMessage For="() => selectedEvent.Title" class="text-danger" />
                     </div>
-                </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="type" class="form-label">Type:</label>
+                            <InputSelect id="type" @bind-Value="selectedEvent.Type" class="form-control" name="selectedEvent.Type">
+                                <option value="">Select Type</option>
+                                <option value="Physical">Physical</option>
+                                <option value="Virtual">Virtual</option>
+                                <option value="Hybrid">Hybrid</option>
+                            </InputSelect>
+                            <ValidationMessage For="() => selectedEvent.Type" class="text-danger" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="eventdate" class="form-label">Event Date:</label>
+                            <InputDate id="eventdate" @bind-Value="selectedEvent.EventDate" class="form-control" name="selectedEvent.EventDate" />
+                            <ValidationMessage For="() => selectedEvent.EventDate" class="text-danger" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="location" class="form-label">Location:</label>
+                            <InputText id="location" @bind-Value="selectedEvent.Location" class="form-control" name="selectedEvent.Location" />
+                            <ValidationMessage For="() => selectedEvent.Location" class="text-danger" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="totalcapacity" class="form-label">Total Capacity:</label>
+                            <InputNumber id="totalcapacity" @bind-Value="selectedEvent.TotalCapacity" class="form-control" name="selectedEvent.TotalCapacity" />
+                            <ValidationMessage For="() => selectedEvent.TotalCapacity" class="text-danger" />
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="category" class="form-label">Category:</label>
+                        <InputText id="category" @bind-Value="selectedEvent.Category" class="form-control" name="selectedEvent.Category" />
+                        <ValidationMessage For="() => selectedEvent.Category" class="text-danger" />
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="description" class="form-label">Description:</label>
+                        <InputTextArea id="description" @bind-Value="selectedEvent.Description" class="form-control" rows="4" name="selectedEvent.Description" />
+                        <ValidationMessage For="() => selectedEvent.Description" class="text-danger" />
+                    </div>
+
+                    <div class="audit-section">
+                        <div class="audit-title">Audit Information</div>
+
+                        <div class="form-row-triple">
+                            <div class="form-group">
+                                <label for="createdby" class="form-label">Created By:</label>
+                                <input id="createdby" value="@selectedEvent.CreatedBy" class="form-control" disabled />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="datecreated" class="form-label">Date Created:</label>
+                                <input id="datecreated" value="@selectedEvent.DateCreated.ToString("yyyy-MM-dd")" class="form-control" disabled />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="status" class="form-label">Status:</label>
+                                <input id="status" value="@selectedEvent.Status" class="form-control" disabled />
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(selectedEvent.UpdatedBy))
+                        {
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="updatedby" class="form-label">Last Updated By:</label>
+                                    <input id="updatedby" value="@selectedEvent.UpdatedBy" class="form-control" disabled />
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="dateupdated" class="form-label">Last Updated:</label>
+                                    <input id="dateupdated" value="@selectedEvent.DateUpdated.ToString("yyyy-MM-dd")" class="form-control" disabled />
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            Save Changes
+                        </button>
+                        <a href="/events" class="btn btn-secondary">
+                            <span>✕</span> Cancel
+                        </a>
+                    </div>
+                </EditForm>
             </div>
         </div>
     }
@@ -176,14 +176,14 @@
                 return;
             }
 
-            // ✅ Check authorization: Only Event Creator (not admin)
+            // Check authorization: Only Event Creator (not admin)
             if (selectedEvent.CreatedBy != currentUserEmail)
             {
                 isUnauthorized = true;
                 return;
             }
 
-            // ✅ Check if event can be edited (only Pending status)
+            // Check if event can be edited (only Pending status)
             if (selectedEvent.Status != "Pending")
             {
                 cannotEdit = true;

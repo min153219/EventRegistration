@@ -29,27 +29,27 @@
                 </button>
                 <button class="events-filter-btn @(SelectedCategory == "Music" ? "active" : "")"
                         @onclick="@(() => FilterByCategory("Music"))">
-                    🎵 Music & Concerts
+                    Music & Concerts
                 </button>
                 <button class="events-filter-btn @(SelectedCategory == "Educational" ? "active" : "")"
                         @onclick="@(() => FilterByCategory("Educational"))">
-                    📚 Educational
+                    Educational
                 </button>
                 <button class="events-filter-btn @(SelectedCategory == "Arts" ? "active" : "")"
                         @onclick="@(() => FilterByCategory("Arts"))">
-                    🎨 Arts & Culture
+                   Arts & Culture
                 </button>
                 <button class="events-filter-btn @(SelectedCategory == "Professional" ? "active" : "")"
                         @onclick="@(() => FilterByCategory("Professional"))">
-                    💼 Professional
+                    Professional
                 </button>
                 <button class="events-filter-btn @(SelectedCategory == "Sports" ? "active" : "")"
                         @onclick="@(() => FilterByCategory("Sports"))">
-                    ⚽️ Sports
+                    Sports
                 </button>
                 <button class="events-filter-btn @(SelectedCategory == "Entertainment" ? "active" : "")"
                         @onclick="@(() => FilterByCategory("Entertainment"))">
-                    🎬 Entertainment
+                    Entertainment
                 </button>
             </div>
         </div>
@@ -119,7 +119,7 @@
             else
             {
                 <div class="events-no-results">
-                    <div class="events-no-results-icon">📅</div>
+                    
                     <h3>No events found</h3>
                     <p>There are currently no events in this category.</p>
                     <button class="events-no-results-btn" @onclick="@(() => FilterByCategory(null))">

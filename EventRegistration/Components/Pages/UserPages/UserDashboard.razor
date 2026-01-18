@@ -25,14 +25,14 @@
     {
         <!-- Dashboard Header -->
         <div class="dashboard-header">
-            <h1 class="dashboard-title">📊 My Dashboard</h1>
+            <h1 class="dashboard-title"> My Dashboard</h1>
             <p class="dashboard-welcome">Welcome back, <strong>@userName</strong>!</p>
         </div>
 
         <!-- Stats Cards -->
         <div class="stats-grid">
             <div class="stat-card stat-primary">
-                <div class="stat-icon">🎫</div>
+                
                 <div class="stat-content">
                     <div class="stat-value">@totalRegistrations</div>
                     <div class="stat-label">Registered Events</div>
@@ -40,7 +40,7 @@
             </div>
 
             <div class="stat-card stat-success">
-                <div class="stat-icon">📝</div>
+                
                 <div class="stat-content">
                     <div class="stat-value">@totalEventsCreated</div>
                     <div class="stat-label">Events Created</div>
@@ -48,7 +48,7 @@
             </div>
 
             <div class="stat-card stat-info">
-                <div class="stat-icon">👥</div>
+                
                 <div class="stat-content">
                     <div class="stat-value">@totalAttendees</div>
                     <div class="stat-label">Total Attendees</div>
@@ -56,7 +56,7 @@
             </div>
 
             <div class="stat-card stat-warning">
-                <div class="stat-icon">💰</div>
+                
                 <div class="stat-content">
                     <div class="stat-value">$@totalRevenue.ToString("F2")</div>
                     <div class="stat-label">Total Revenue</div>
@@ -67,7 +67,7 @@
         <!-- My Registrations Section -->
         <div class="dashboard-section">
             <div class="section-header">
-                <h2 class="section-title">🎫 My Registrations</h2>
+                <h2 class="section-title">My Registrations</h2>
                 <div class="filter-tabs">
                     <button class="filter-tab @(registrationFilter == "all" ? "active" : "")"
                             @onclick="@(() => SetRegistrationFilter("all"))">
@@ -101,23 +101,23 @@
 
                             <div class="card-details">
                                 <div class="detail-item">
-                                    <span class="detail-icon">📅</span>
+                                    
                                     <span>@registration.Event?.EventDate.ToString("MMMM dd, yyyy")</span>
                                 </div>
                                 <div class="detail-item">
-                                    <span class="detail-icon">🕐</span>
+                                    
                                     <span>@registration.Event?.EventDate.ToString("h:mm tt")</span>
                                 </div>
                                 <div class="detail-item">
-                                    <span class="detail-icon">📍</span>
+                                    
                                     <span>@registration.Event?.Location</span>
                                 </div>
                                 <div class="detail-item">
-                                    <span class="detail-icon">🎫</span>
+                                    
                                     <span>@registration.Ticket?.Type x @registration.Quantity</span>
                                 </div>
                                 <div class="detail-item">
-                                    <span class="detail-icon">💰</span>
+                                    
                                     <span class="detail-price">
                                         @if (registration.TotalAmount == 0)
                                         {
@@ -148,7 +148,7 @@
                 else
                 {
                     <div class="empty-state">
-                        <div class="empty-icon">🎫</div>
+                        
                         <h3>No registrations yet</h3>
                         <p>Start exploring events and register for your first one!</p>
                         <button class="btn-primary" @onclick="GoToExploreEvents">
@@ -162,10 +162,10 @@
         <!-- My Created Events Section -->
         <div class="dashboard-section">
             <div class="section-header">
-                <h2 class="section-title">📝 My Created Events</h2>
+                <h2 class="section-title"> My Created Events</h2>
                 <div class="section-actions">
                     <button class="btn-primary" @onclick="GoToCreateEvent">
-                        + Create New Event
+                        Create New Event
                     </button>
                 </div>
             </div>
@@ -208,7 +208,7 @@
 
                             <div class="card-details">
                                 <div class="detail-item">
-                                    <span class="detail-icon">📅</span>
+                                    
                                     <span>@evt.EventDate.ToString("MMMM dd, yyyy")</span>
                                 </div>
                                 <div class="detail-item">
@@ -220,21 +220,21 @@
                             <!-- Event Statistics -->
                             <div class="event-stats">
                                 <div class="stat-item">
-                                    <span class="stat-icon">👥</span>
+                                    
                                     <div class="stat-info">
                                         <div class="stat-number">@attendeeCount / @evt.TotalCapacity</div>
                                         <div class="stat-text">Registered</div>
                                     </div>
                                 </div>
                                 <div class="stat-item">
-                                    <span class="stat-icon">💰</span>
+                                    
                                     <div class="stat-info">
                                         <div class="stat-number">$@revenue.ToString("F2")</div>
                                         <div class="stat-text">Revenue</div>
                                     </div>
                                 </div>
                                 <div class="stat-item">
-                                    <span class="stat-icon">📊</span>
+                                    
                                     <div class="stat-info">
                                         <div class="stat-number">@percentFull.ToString("F0")%</div>
                                         <div class="stat-text">Capacity</div>
@@ -249,13 +249,13 @@
 
                             <div class="card-actions">
                                 <button class="btn-info" @onclick="@(() => ViewAttendees(evt.Id))">
-                                    👥 Attendees
+                                    Attendees
                                 </button>
                                 <button class="btn-secondary" @onclick="@(() => EditEvent(evt.Id))">
-                                    ✏️ Edit
+                                    Edit
                                 </button>
                                 <button class="btn-danger" @onclick="@(() => DeleteEvent(evt.Id))">
-                                    🗑️ Delete
+                                    Delete
                                 </button>
                             </div>
                         </div>
@@ -264,7 +264,7 @@
                 else
                 {
                     <div class="empty-state">
-                        <div class="empty-icon">📝</div>
+                        
                         <h3>No events created yet</h3>
                         <p>Start creating your first event and manage attendees!</p>
                         <button class="btn-primary" @onclick="GoToCreateEvent">

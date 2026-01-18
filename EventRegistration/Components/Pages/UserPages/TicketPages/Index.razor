@@ -11,52 +11,77 @@
 
 <PageTitle>Event Tickets</PageTitle>
 
-@if (isUnauthorized)
-{
-    <div class="alert alert-danger">
-        <h4>Access Denied</h4>
-        <p>You don't have permission to view tickets for this event. Only the event creator can manage tickets.</p>
-        <a href="/events" class="btn btn-primary">Back to Events</a>
-    </div>
-}
-else if (selectedEvent is null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <h1>@selectedEvent.Title - Tickets</h1>
-    <div class="card mb-4">
-        <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-3">Event Date:</dt>
-                <dd class="col-sm-9">@selectedEvent.EventDate.ToString("dd/MM/yyyy")</dd>
-                <dt class="col-sm-3">Location:</dt>
-                <dd class="col-sm-9">@selectedEvent.Location</dd>
-                <dt class="col-sm-3">Total Capacity:</dt>
-                <dd class="col-sm-9">@selectedEvent.TotalCapacity</dd>
-            </dl>
+<link href="/index.razor.css" rel="stylesheet" />
+
+<div class="tickets-container">
+    @if (isUnauthorized)
+    {
+        <div class="alert-unauthorized">
+            <h4>Access Denied</h4>
+            <p>You don't have permission to view tickets for this event. Only the event creator can manage tickets.</p>
+            <a href="/events" class="btn-create">Back to Events</a>
         </div>
-    </div>
-    <p>
-        <a href="@($"/events/{EventId}/tickets/create")">Create New Ticket</a>
-    </p>
-    <QuickGrid Class="table" Items="context.Ticket.Where(t => t.EventId == EventId)">
-        <PropertyColumn Property="ticket => ticket.Price" />
-        <PropertyColumn Property="ticket => ticket.Type" />
-        <PropertyColumn Property="ticket => ticket.DateCreated" />
-        <PropertyColumn Property="ticket => ticket.DateUpdated" />
-        <PropertyColumn Property="ticket => ticket.CreatedBy" />
-        <PropertyColumn Property="ticket => ticket.UpdatedBy" />
-        <TemplateColumn Context="ticket">
-            <a href="@($"/tickets/edit?id={ticket.Id}")">Edit</a> |
-            <a href="@($"/tickets/details?id={ticket.Id}")">Details</a> |
-            <a href="@($"/tickets/delete?id={ticket.Id}")">Delete</a>
-        </TemplateColumn>
-    </QuickGrid>
-}
-<div class="mt-3">
-    <a href="/events">Back to Events</a>
+    }
+    else if (selectedEvent is null)
+    {
+        <div class="loading">
+            <p><em>Loading event details...</em></p>
+        </div>
+    }
+    else
+    {
+        <div class="page-header">
+            <h1>@selectedEvent.Title - Tickets</h1>
+        </div>
+
+        <div class="event-info-card">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Event Date</span>
+                    <span class="info-value">@selectedEvent.EventDate.ToString("dd MMM yyyy")</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Location</span>
+                    <span class="info-value">@selectedEvent.Location</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Total Capacity</span>
+                    <span class="info-value">
+                        <span class="badge badge-capacity">@selectedEvent.TotalCapacity seats</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <a href="@($"/events/{EventId}/tickets/create")" class="btn-create">
+                Create New Ticket
+            </a>
+        </div>
+
+        <div class="table-container">
+            <QuickGrid Class="table" Items="context.Ticket.Where(t => t.EventId == EventId)">
+                <PropertyColumn Property="ticket => ticket.Price" Title="Price" />
+                <PropertyColumn Property="ticket => ticket.Type" Title="Type" />
+                <PropertyColumn Property="ticket => ticket.DateCreated" Title="Created" Format="dd/MM/yyyy HH:mm" />
+                <PropertyColumn Property="ticket => ticket.DateUpdated" Title="Updated" Format="dd/MM/yyyy HH:mm" />
+                <PropertyColumn Property="ticket => ticket.CreatedBy" Title="Created By" />
+                <TemplateColumn Title="Actions" Context="ticket">
+                    <div class="action-links">
+                        <a href="@($"/tickets/edit?id={ticket.Id}")">Edit</a>
+                        <span>|</span>
+                        <a href="@($"/tickets/details?id={ticket.Id}")">Details</a>
+                        <span>|</span>
+                        <a href="@($"/tickets/delete?id={ticket.Id}")">Delete</a>
+                    </div>
+                </TemplateColumn>
+            </QuickGrid>
+        </div>
+
+        <div class="action-bar" style="margin-top: 2rem;">
+            <a href="/events" class="btn-back">← Back to Events</a>
+        </div>
+    }
 </div>
 
 @code {
@@ -75,6 +100,7 @@ else
         var isAdmin = authState.User.IsInRole("Administrator");
 
         context = DbFactory.CreateDbContext();
+
         selectedEvent = await context.Event
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.Id == EventId);
@@ -85,7 +111,7 @@ else
             return;
         }
 
-        // ✅ Check authorization: Admin OR Event Creator
+        // Check authorization: Admin OR Event Creator
         if (!isAdmin && selectedEvent.CreatedBy != currentUserEmail)
         {
             isUnauthorized = true;

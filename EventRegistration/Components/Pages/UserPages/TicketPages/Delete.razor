@@ -4,40 +4,91 @@
 @inject IDbContextFactory<EventRegistration.Data.EventRegistrationContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Delete</PageTitle>
+<PageTitle>Delete Ticket</PageTitle>
 
-<h1>Delete</h1>
+<link rel="stylesheet" href="Delete.razor.css" />
 
-<p>Are you sure you want to delete this?</p>
-<div>
-    <h2>Ticket</h2>
-    <hr />
+<div class="delete-container">
+    <div class="warning-banner">
+        <h4 class="warning-banner-header">Confirm Deletion
+        </h4>
+        <p class="warning-banner-text">Are you sure you want to delete this ticket? This action cannot be undone.</p>
+    </div>
+
     @if (selectedTicket is null)
     {
-        <p><em>Loading...</em></p>
+        <div class="loading-container">
+            <div class="spinner"></div>
+            <p class="loading-text"><em>Loading ticket details...</em></p>
+        </div>
     }
     else
     {
-        <dl class="row">
-            <dt class="col-sm-2">Price</dt>
-            <dd class="col-sm-10">@selectedTicket.Price</dd>
-            <dt class="col-sm-2">Type</dt>
-            <dd class="col-sm-10">@selectedTicket.Type</dd>
-            <dt class="col-sm-2">EventId</dt>
-            <dd class="col-sm-10">@selectedTicket.EventId</dd>
-            <dt class="col-sm-2">DateCreated</dt>
-            <dd class="col-sm-10">@selectedTicket.DateCreated</dd>
-            <dt class="col-sm-2">DateUpdated</dt>
-            <dd class="col-sm-10">@selectedTicket.DateUpdated</dd>
-            <dt class="col-sm-2">CreatedBy</dt>
-            <dd class="col-sm-10">@selectedTicket.CreatedBy</dd>
-            <dt class="col-sm-2">UpdatedBy</dt>
-            <dd class="col-sm-10">@selectedTicket.UpdatedBy</dd>
-        </dl>
-        <EditForm method="post" Model="selectedTicket" OnValidSubmit="DeleteTicket" FormName="delete" Enhance>
-            <button type="submit" class="btn btn-danger" disabled="@(selectedTicket is null)">Delete</button> |
-            <a href="@($"/events/{selectedTicket.EventId}/tickets")">Back to List</a>
-        </EditForm>
+        <div class="delete-layout">
+            <div>
+                <div class="event-card">
+                    <div class="event-card-header">
+                        <h5>icket to be Deleted</h5>
+                    </div>
+                    <div class="event-card-body">
+                        <dl class="details-list">
+                            <dt class="details-label">Price:</dt>
+                            <dd class="details-value">$@selectedTicket.Price.ToString("0.00")</dd>
+
+                            <dt class="details-label">Type:</dt>
+                            <dd class="details-value">
+                                <span class="badge badge-info">@selectedTicket.Type</span>
+                            </dd>
+
+                            <dt class="details-label">Event ID:</dt>
+                            <dd class="details-value">@selectedTicket.EventId</dd>
+
+                            <dt class="details-label">Date Created:</dt>
+                            <dd class="details-value">@selectedTicket.DateCreated.ToString("MMM dd, yyyy 'at' h:mm tt")</dd>
+
+                            <dt class="details-label">Date Updated:</dt>
+                            <dd class="details-value">@selectedTicket.DateUpdated.ToString("MMM dd, yyyy 'at' h:mm tt")</dd>
+
+                            <dt class="details-label">Created By:</dt>
+                            <dd class="details-value">@selectedTicket.CreatedBy</dd>
+
+                            <dt class="details-label">Updated By:</dt>
+                            <dd class="details-value">@selectedTicket.UpdatedBy</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <EditForm method="post" Model="selectedTicket" OnValidSubmit="DeleteTicket" FormName="delete" Enhance>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-danger" disabled="@(selectedTicket is null)">
+                            Yes, Delete This Ticket
+                        </button>
+                        <a href="@($"/events/{selectedTicket.EventId}/tickets")" class="btn btn-secondary">
+                            <span>✕</span> Cancel
+                        </a>
+                    </div>
+                </EditForm>
+            </div>
+
+            <div>
+                <div class="warning-sidebar">
+                    <h5 class="warning-sidebar-title">
+                         Warning
+                    </h5>
+                    <p class="warning-sidebar-text">Deleting this ticket will permanently remove:</p>
+                    <ul class="warning-list">
+                        <li>Ticket information</li>
+                        <li>Associated bookings</li>
+                        <li>Purchase records</li>
+                        <li>Payment history</li>
+                    </ul>
+                    <hr class="divider">
+                    <p class="warning-footer">
+                        This action cannot be undone. Please make sure you want to proceed.
+                    </p>
+                </div>
+            </div>
+        </div>
     }
 </div>
 
@@ -60,9 +111,15 @@
 
     private async Task DeleteTicket()
     {
+        if (selectedTicket is null)
+        {
+            return;
+        }
+
         using var context = DbFactory.CreateDbContext();
-        context.Ticket.Remove(selectedTicket!);
+        context.Ticket.Remove(selectedTicket);
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo($"/events/{selectedTicket!.EventId}/tickets");
+
+        NavigationManager.NavigateTo($"/events/{selectedTicket.EventId}/tickets");
     }
 }

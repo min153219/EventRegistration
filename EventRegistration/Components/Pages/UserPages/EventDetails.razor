@@ -20,7 +20,6 @@
 else if (eventData == null)
 {
     <div class="detail-not-found">
-        <div class="detail-not-found-icon">📅</div>
         <h2>Event Not Found</h2>
         <p>Sorry, we couldn't find the event you're looking for.</p>
         <button class="detail-back-btn" @onclick="GoToExploreEvents">
@@ -47,19 +46,19 @@ else
 
                 <div class="detail-meta">
                     <div class="detail-meta-item">
-                        <span class="detail-meta-icon">📅</span>
+                        
                         <span>@eventData.EventDate.ToString("MMMM dd, yyyy")</span>
                     </div>
                     <div class="detail-meta-item">
-                        <span class="detail-meta-icon">🕐</span>
+                        
                         <span>@eventData.EventDate.ToString("h:mm tt")</span>
                     </div>
                     <div class="detail-meta-item">
-                        <span class="detail-meta-icon">📍</span>
+                        
                         <span>@eventData.Location</span>
                     </div>
                     <div class="detail-meta-item">
-                        <span class="detail-meta-icon">👥</span>
+                        
                         <span>@eventData.TotalCapacity spots</span>
                     </div>
                 </div>

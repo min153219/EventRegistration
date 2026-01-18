@@ -1,0 +1,162 @@
+﻿@page "/about"
+@using Microsoft.AspNetCore.Components
+
+<PageTitle>About - Eventora</PageTitle>
+
+<link href="/About.razor.css" rel="stylesheet" />
+
+<div class="about-container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">About Eventora</h1>
+            <p class="hero-subtitle">Your Ultimate Event Registration Platform</p>
+        </div>
+    </section>
+
+    <!-- Mission Section -->
+    <section class="mission-section">
+        <div class="content-wrapper">
+            <h2 class="section-title">Our Mission</h2>
+            <p class="mission-text">
+                Eventora is dedicated to revolutionizing the way people discover, create, and manage events.
+                We provide a seamless platform that connects event organizers with attendees, making event
+                registration simple, efficient, and enjoyable. Our goal is to help you create unforgettable
+                experiences that bring people together.
+            </p>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="content-wrapper">
+            <h2 class="section-title">Why Choose Eventora?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    
+                    <h3>Easy Registration</h3>
+                    <p>Simple and intuitive event registration process that saves time for both organizers and attendees.</p>
+                </div>
+                <div class="feature-card">
+                    
+                    <h3>Event Discovery</h3>
+                    <p>Find the perfect events from various categories tailored to your interests and preferences.</p>
+                </div>
+                <div class="feature-card">
+                    
+                    <h3>Analytics Dashboard</h3>
+                    <p>Track event performance with comprehensive analytics and real-time registration data.</p>
+                </div>
+                <div class="feature-card">
+                    
+                    <h3>Community Building</h3>
+                    <p>Connect with like-minded people and build lasting relationships through shared experiences.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team-section">
+        <div class="content-wrapper">
+            <h2 class="section-title">Meet Our Team</h2>
+            <p class="team-intro">Passionate individuals dedicated to making event management effortless</p>
+            <div class="team-grid">
+                @foreach (var member in teamMembers)
+                {
+                    <div class="team-card">
+                        <div class="team-avatar" style="background: @member.AvatarColor;">@member.Initials</div>
+                        <h3 class="team-name">@member.Name</h3>
+                        <p class="team-role">@member.Role</p>
+                        <p class="team-bio">@member.Bio</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="content-wrapper">
+            <h2 class="stats-title">Eventora by the Numbers</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">10K+</div>
+                    <div class="stat-label">Events Created</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">50K+</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100+</div>
+                    <div class="stat-label">Event Categories</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">99%</div>
+                    <div class="stat-label">Satisfaction Rate</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vision Section -->
+    <section class="vision-section">
+        <div class="content-wrapper">
+            <h2 class="section-title">Our Vision</h2>
+            <p class="vision-text">
+                We envision a world where organizing and attending events is effortless, where meaningful
+                connections are just a click away, and where every experience creates lasting memories.
+                Eventora is committed to innovation, excellence, and putting our users first in everything we do.
+            </p>
+        </div>
+    </section>
+</div>
+
+@code {
+    private List<TeamMember> teamMembers = new()
+    {
+        new TeamMember
+        {
+            Name = "Min Khant Kyaw",
+            Role = "Founder & CEO",
+            Bio = "Passionate about creating meaningful connections through events.",
+            Initials = "MK",
+            AvatarColor = "#7c7cff"
+        },
+        new TeamMember
+        {
+            Name = "Yoon Ei",
+            Role = "Chief Technology Officer",
+            Bio = "Building scalable solutions for seamless event management.",
+            Initials = "YE",
+            AvatarColor = "#7c7cff"
+        },
+        new TeamMember
+        {
+            Name = "Taylor Chen",
+            Role = "Head of Product",
+            Bio = "Designing intuitive experiences for event organizers and attendees.",
+            Initials = "TC",
+            AvatarColor = "#7c7cff"
+        },
+        new TeamMember
+        {
+            Name = "Morgan Lee",
+            Role = "Community Manager",
+            Bio = "Fostering connections and ensuring user satisfaction.",
+            Initials = "ML",
+            AvatarColor = "#7c7cff"
+        }
+    };
+
+    public class TeamMember
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string Bio { get; set; } = string.Empty;
+        public string Initials { get; set; } = string.Empty;
+        public string AvatarColor { get; set; } = string.Empty;
+    }
+}
+
