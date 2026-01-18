@@ -44,5 +44,9 @@ namespace EventRegistration.Domain
 
         [ForeignKey("TicketId")]
         public virtual Ticket? Ticket { get; set; }
+        
+        public string PaymentStatus { get; set; } = "Unpaid"; 
+        public DateTime? PaymentDate { get; set; }
+        public string? TransactionId { get; set; }
     }
 }

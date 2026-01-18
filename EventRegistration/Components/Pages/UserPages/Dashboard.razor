@@ -92,6 +92,16 @@
                         <div class="event-card registration-card">
                             <div class="card-header">
                                 <span class="category-badge">@registration.Event?.Category</span>
+
+                                @if (registration.PaymentStatus == "Paid")
+                                {
+                                    <span class="status-badge status-paid">✅ Paid</span>
+                                }
+                                else if (registration.TotalAmount > 0)
+                                {
+                                    <span class="status-badge status-unpaid">🔴 Unpaid</span>
+                                }
+
                                 <span class="status-badge status-@registration.Status?.ToLower()">
                                     @registration.Status
                                 </span>
@@ -129,12 +139,27 @@
                                         }
                                     </span>
                                 </div>
+                                @if (registration.PaymentStatus == "Paid" && registration.PaymentDate.HasValue)
+                                {
+                                    <div class="detail-item">
+                                        <span class="detail-icon">💳</span>
+                                        <span>Paid on @registration.PaymentDate.Value.ToString("MMM dd, yyyy")</span>
+                                    </div>
+                                }
                             </div>
 
                             <div class="card-actions">
                                 <button class="btn-secondary" @onclick="@(() => ViewEventDetails(registration.EventId))">
                                     View Details
                                 </button>
+
+                                @if ((registration.PaymentStatus == "Unpaid" || string.IsNullOrEmpty(registration.PaymentStatus)) && registration.TotalAmount > 0)
+                                {
+                                    <button class="btn-primary" @onclick="@(() => MarkAsPaid(registration.Id, registration.TotalAmount))">
+                                        💳 Pay Now ($@registration.TotalAmount.ToString("F2"))
+                                    </button>
+                                }
+
                                 @if (registration.Status == "Confirmed" && registration.Event?.EventDate > DateTime.Now)
                                 {
                                     <button class="btn-danger" @onclick="@(() => CancelRegistration(registration.Id))">
@@ -487,6 +512,35 @@
         if (await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this event? This action cannot be undone."))
         {
             Navigation.NavigateTo($"/Events/Delete/{eventId}");
+        }
+    }
+
+    private async Task MarkAsPaid(int registrationId, decimal amount)
+    {
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm",
+            $"Mark as Paid?\n\nTotal Amount: ${amount:F2}\n\nClick OK to confirm payment.");
+
+        if (confirmed)
+        {
+            try
+            {
+                var registration = await DbContext.Registration.FindAsync(registrationId);
+                if (registration != null)
+                {
+                    registration.PaymentStatus = "Paid";
+                    registration.PaymentDate = DateTime.Now;
+                    registration.TransactionId = $"TXN{DateTime.Now.Ticks.ToString().Substring(8)}";
+                    registration.Status = "Confirmed";
+                    registration.DateUpdated = DateTime.Now;
+
+                    await DbContext.SaveChangesAsync();
+                    await LoadDashboardData(); // Reload to show updated status
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Payment error: {ex.Message}");
+            }
         }
     }
 

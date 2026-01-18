@@ -504,3 +504,14 @@
         width: 100%;
     }
 }
+
+/* Payment Status Badges */
+.status-paid {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-unpaid {
+    background: #fef3c7;
+    color: #92400e;
+}
