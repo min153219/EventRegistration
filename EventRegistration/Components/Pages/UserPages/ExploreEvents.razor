@@ -3,6 +3,7 @@
 @using EventRegistration.Data
 @using EventRegistration.Domain
 @using Microsoft.EntityFrameworkCore
+@using EventRegistration.Components.Shared
 @inject EventRegistrationContext DbContext
 @inject NavigationManager Navigation
 
@@ -73,6 +74,7 @@
                             <div class="event-result-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                                 <div class="event-result-icon">@GetCategoryIcon(evt.Category)</div>
                                 <span class="event-result-category-badge">@evt.Category</span>
+                                <EventCountdown EventDate="@evt.EventDate" CssClass="event-countdown-overlay" />
                             </div>
 
                             <div class="event-result-content">
@@ -155,9 +157,11 @@
 
         try
         {
+            var now = DateTime.Now; 
+
             var query = DbContext.Event
                 .Include(e => e.Tickets)
-                .Where(e => e.Status == "Approved")  // 👈 ONLY THIS LINE ADDED - Show only approved events
+                .Where(e => e.Status == "Approved" && e.EventDate >= now) 
                 .AsQueryable();
 
             // Filter by category if specified

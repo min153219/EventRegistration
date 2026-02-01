@@ -3,6 +3,7 @@
 @using EventRegistration.Data
 @using EventRegistration.Domain
 @using Microsoft.EntityFrameworkCore
+@using EventRegistration.Components.Shared
 @inject EventRegistrationContext DbContext
 @inject NavigationManager Navigation
 
@@ -43,7 +44,7 @@
     </div>
 </section>
 
-<!-- Highlighted Events - Now Dynamic! -->
+<!-- Highlighted Events - Now Dynamic with Countdown! -->
 <section class="highlighted-events">
     <div class="container">
         <h2 class="section-title">Featured Events</h2>
@@ -63,9 +64,13 @@
                     <div class="event-card">
                         <div class="event-image">@GetCategoryIcon(evt.Category)</div>
                         <div class="event-content">
-                            <span class="event-tag">@evt.Category</span>
+                            <div class="event-header">
+                                <span class="event-tag">@evt.Category</span>
+                                <!-- ADD COUNTDOWN HERE -->
+                                <EventCountdown EventDate="@evt.EventDate" />
+                            </div>
                             <h3>@evt.Title</h3>
-                            <p class="event-details">📅 @evt.EventDate.ToString("MMM dd, yyyy") | 📍 @evt.Location</p>
+                            <p class="event-details">📅 @evt.EventDate.ToString("MMM dd, yyyy") | 📍 @GetShortLocation(evt.Location)</p>
                             <p class="event-price">
                                 @if (evt.Tickets != null && evt.Tickets.Any())
                                 {
@@ -95,7 +100,10 @@
         else
         {
             <div class="no-events-message">
-                <p>No featured events available at the moment.</p>
+                <p>No upcoming featured events available at the moment.</p>
+                <button class="btn-primary" @onclick="@(() => Navigation.NavigateTo("/explore-events"))">
+                    Explore All Events
+                </button>
             </div>
         }
     </div>
@@ -121,11 +129,15 @@
 
         try
         {
-            // Load featured events from database
+            var now = DateTime.Now;
+
+            // Load featured events that are UPCOMING ONLY (EventDate >= Now)
             featuredEvents = await DbContext.Event
                 .Include(e => e.Tickets)
-                .Where(e => e.IsFeatured == true && e.Status == "Approved")
-                .OrderBy(e => e.EventDate)
+                .Where(e => e.IsFeatured == true 
+                         && e.Status == "Approved"
+                         && e.EventDate >= now) // ← FILTER OUT PAST EVENTS
+                .OrderBy(e => e.EventDate) // Order by date (soonest first)
                 .Take(6) // Show up to 6 featured events
                 .ToListAsync();
         }
@@ -165,5 +177,17 @@
             "Sports" => "🏃",
             _ => "📅"
         };
+    }
+
+    private string GetShortLocation(string? location)
+    {
+        if (string.IsNullOrEmpty(location))
+            return "TBA";
+
+        // Shorten long location names for display
+        if (location.Length > 30)
+            return location.Substring(0, 27) + "...";
+
+        return location;
     }
 }

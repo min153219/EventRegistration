@@ -1,0 +1,99 @@
+﻿@using System.Timers
+
+<div class="countdown-container @CssClass">
+    @if (timeRemaining != null)
+    {
+        @if (timeRemaining.Value.TotalSeconds > 0)
+        {
+            <div class="countdown-badge @GetUrgencyClass()">
+                <span class="countdown-text">@GetCountdownText()</span>
+            </div>
+        }
+        else
+        {
+            <div class="countdown-badge event-ended">
+                <span class="countdown-text">Event Ended</span>
+            </div>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public DateTime EventDate { get; set; }
+
+    [Parameter]
+    public string CssClass { get; set; } = "";
+
+    private TimeSpan? timeRemaining;
+    private Timer? timer;
+
+    protected override void OnInitialized()
+    {
+        UpdateTimeRemaining();
+
+        // Update every minute
+        timer = new Timer(60000); // 60 seconds
+        timer.Elapsed += (sender, e) => UpdateTimeRemaining();
+        timer.Start();
+    }
+
+    private void UpdateTimeRemaining()
+    {
+        timeRemaining = EventDate - DateTime.Now;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private string GetCountdownText()
+    {
+        if (timeRemaining == null || timeRemaining.Value.TotalSeconds <= 0)
+            return "Event Ended";
+
+        var days = (int)timeRemaining.Value.TotalDays;
+        var hours = timeRemaining.Value.Hours;
+        var minutes = timeRemaining.Value.Minutes;
+
+        if (days > 30)
+        {
+            var months = days / 30;
+            return $"{months} {(months == 1 ? "month" : "months")} away";
+        }
+        else if (days > 0)
+        {
+            return $"{days} {(days == 1 ? "day" : "days")} left";
+        }
+        else if (hours > 0)
+        {
+            return $"{hours}h {minutes}m remaining";
+        }
+        else if (minutes > 0)
+        {
+            return $"{minutes} {(minutes == 1 ? "minute" : "minutes")} left";
+        }
+        else
+        {
+            return "Starting soon!";
+        }
+    }
+
+    private string GetUrgencyClass()
+    {
+        if (timeRemaining == null || timeRemaining.Value.TotalSeconds <= 0)
+            return "event-ended";
+
+        var days = timeRemaining.Value.TotalDays;
+
+        if (days <= 1)
+            return "urgent"; // Less than 1 day - red
+        else if (days <= 7)
+            return "soon"; // Less than 7 days - orange
+        else
+            return "upcoming"; // More than 7 days - green
+    }
+
+    public void Dispose()
+    {
+        timer?.Stop();
+        timer?.Dispose();
+    }
+}
