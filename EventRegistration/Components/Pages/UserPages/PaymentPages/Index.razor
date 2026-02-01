@@ -1,115 +1,329 @@
 ﻿@page "/events/{eventId:int}/payments"
-@using Microsoft.EntityFrameworkCore
-@using Microsoft.AspNetCore.Components.QuickGrid
-@using EventRegistration.Domain
+@rendermode InteractiveServer
 @using EventRegistration.Data
+@using EventRegistration.Domain
+@using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.Authorization
-@implements IAsyncDisposable
-@inject IDbContextFactory<EventRegistration.Data.EventRegistrationContext> DbFactory
-@inject NavigationManager NavigationManager
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject EventRegistrationContext DbContext
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JSRuntime
 
-<PageTitle>Event Payments</PageTitle>
+<PageTitle>Event Payments - Eventora</PageTitle>
 
-@if (isUnauthorized)
-{
-    <div class="alert alert-danger">
-        <h4>Access Denied</h4>
-        <p>You don't have permission to view payments for this event. Only the event creator can view payments.</p>
-        <a href="/events" class="btn btn-primary">Back to Events</a>
-    </div>
-}
-else if (selectedEvent is null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <h1>@selectedEvent.Title - Payments Received</h1>
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5>Payment Summary</h5>
-            <div class="row">
-                <div class="col-md-4">
-                    <p><strong>Total Payments:</strong> @totalPayments</p>
-                </div>
-                @*<div class="col-md-4">
-                    <p><strong>Total Revenue:</strong> @selectedEvent.Currency @totalRevenue.ToString("F2")</p>
-                </div>
-                <div class="col-md-4">
-                    <p><strong>Average Payment:</strong> @selectedEvent.Currency @(totalPayments > 0 ? (totalRevenue / totalPayments).ToString("F2") : "0.00")</p>
-                </div> *@
+<link href="/EventPayments.css" rel="stylesheet" />
+
+<div class="payments-page">
+    @if (isLoading)
+    {
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Loading payment details...</p>
+        </div>
+    }
+    else if (eventData == null)
+    {
+        <div class="error-container">
+            <div class="error-icon">⚠️</div>
+            <h2>Event Not Found</h2>
+            <p>The event you're looking for doesn't exist.</p>
+            <button class="btn-back" @onclick="GoBack">Back to My Events</button>
+        </div>
+    }
+    else if (eventData.CreatedBy != currentUserEmail)
+    {
+        <div class="error-container">
+            <div class="error-icon">🔒</div>
+            <h2>Access Denied</h2>
+            <p>You don't have permission to view payments for this event.</p>
+            <button class="btn-back" @onclick="GoBack">Back to My Events</button>
+        </div>
+    }
+    else
+    {
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">@eventData.Title - Payments Received</h1>
+                <p class="page-subtitle">
+                    📅 @eventData.EventDate.ToString("MMMM dd, yyyy") |
+                    📍 @eventData.Location
+                </p>
+            </div>
+            <div class="header-actions">
+                <button class="btn-secondary" @onclick="GoBack">
+                    ← Back to Events
+                </button>
+                @if (registrations.Any())
+                {
+                    <button class="btn-primary" @onclick="ExportToCSV">
+                        📥 Export CSV
+                    </button>
+                }
             </div>
         </div>
-    </div>
-    <h4>Payment History</h4>
-    <QuickGrid Class="table" Items="GetEventPayments()">
-        <PropertyColumn Property="p => p.PaymentDate" Title="Date" />
-        <PropertyColumn Property="p => p.Amount" Title="Amount" />
-        <PropertyColumn Property="p => p.Currency" />
-        <PropertyColumn Property="p => p.PaymentMethod" Title="Method" />
-        <PropertyColumn Property="p => p.RegistrationId" Title="Registration ID" />
-        <PropertyColumn Property="p => p.CreatedBy" Title="Paid By" />
-        <TemplateColumn Title="Actions">
-            <a href="@($"/payments/details?id={context.Id}")">View Details</a>
-        </TemplateColumn>
-    </QuickGrid>
-}
-<div class="mt-3">
-    <a href="/events">Back to Events</a>
+
+        <!-- Payment Summary Cards -->
+        <div class="summary-grid">
+            <div class="summary-card card-revenue">
+                <div class="summary-icon">💰</div>
+                <div class="summary-content">
+                    <div class="summary-value">$@totalRevenue.ToString("F2")</div>
+                    <div class="summary-label">Total Revenue</div>
+                </div>
+            </div>
+
+            <div class="summary-card card-paid">
+                <div class="summary-icon">✅</div>
+                <div class="summary-content">
+                    <div class="summary-value">@paidCount</div>
+                    <div class="summary-label">Paid Registrations</div>
+                </div>
+            </div>
+
+            <div class="summary-card card-unpaid">
+                <div class="summary-icon">⏳</div>
+                <div class="summary-content">
+                    <div class="summary-value">@unpaidCount</div>
+                    <div class="summary-label">Pending Payments</div>
+                </div>
+            </div>
+
+            <div class="summary-card card-total">
+                <div class="summary-icon">🎫</div>
+                <div class="summary-content">
+                    <div class="summary-value">@totalRegistrations</div>
+                    <div class="summary-label">Total Registrations</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment History Section -->
+        <div class="payment-history-card">
+            <div class="card-header">
+                <h2 class="card-title">Payment History</h2>
+                <div class="filter-tabs">
+                    <button class="filter-tab @(currentFilter == "all" ? "active" : "")"
+                            @onclick="@(() => SetFilter("all"))">
+                        All (@totalRegistrations)
+                    </button>
+                    <button class="filter-tab @(currentFilter == "paid" ? "active" : "")"
+                            @onclick="@(() => SetFilter("paid"))">
+                        Paid (@paidCount)
+                    </button>
+                    <button class="filter-tab @(currentFilter == "unpaid" ? "active" : "")"
+                            @onclick="@(() => SetFilter("unpaid"))">
+                        Unpaid (@unpaidCount)
+                    </button>
+                </div>
+            </div>
+
+            @if (!filteredRegistrations.Any())
+            {
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <h3>No @(currentFilter == "all" ? "" : currentFilter) registrations yet</h3>
+                    <p>When people register for your event, they'll appear here.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-container">
+                    <table class="payments-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Ticket Type</th>
+                                <th>Qty</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Payment Date</th>
+                                <th>Transaction ID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var registration in filteredRegistrations)
+                            {
+                                <tr class="@(registration.PaymentStatus == "Paid" ? "paid-row" : "unpaid-row")">
+                                    <td>@registration.RegistrationDate.ToString("MMM dd, yyyy")</td>
+                                    <td class="name-cell">@registration.FullName</td>
+                                    <td class="email-cell">@registration.Email</td>
+                                    <td>@(registration.Ticket?.Type ?? "N/A")</td>
+                                    <td class="text-center">@registration.Quantity</td>
+                                    <td class="amount-cell">$@registration.TotalAmount.ToString("F2")</td>
+                                    <td>
+                                        @if (registration.PaymentStatus == "Paid")
+                                        {
+                                            <span class="status-badge status-paid">✅ Paid</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="status-badge status-unpaid">⏳ Unpaid</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (registration.PaymentDate.HasValue)
+                                        {
+                                            <span>@registration.PaymentDate.Value.ToString("MMM dd, yyyy")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                    <td class="transaction-cell">
+                                        @if (!string.IsNullOrEmpty(registration.TransactionId))
+                                        {
+                                            <code>@registration.TransactionId</code>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">—</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    }
 </div>
 
 @code {
     [Parameter]
     public int EventId { get; set; }
 
-    private EventRegistrationContext context = default!;
-    private Event? selectedEvent;
-    private int totalPayments = 0;
-    private decimal totalRevenue = 0;
-    private bool isUnauthorized = false;
+    private Event? eventData;
+    private List<EventRegistration.Domain.Registration> registrations = new();
+    private List<EventRegistration.Domain.Registration> filteredRegistrations = new();
+
+    private bool isLoading = true;
+    private string currentUserEmail = "";
+    private string currentFilter = "all";
+
+    // Statistics
+    private int totalRegistrations => registrations.Count;
+    private int paidCount => registrations.Count(r => r.PaymentStatus == "Paid");
+    private int unpaidCount => registrations.Count(r => r.PaymentStatus != "Paid");
+    private decimal totalRevenue => registrations.Where(r => r.PaymentStatus == "Paid").Sum(r => r.TotalAmount);
 
     protected override async Task OnInitializedAsync()
     {
-        // Get current user info
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var currentUserEmail = authState.User.Identity?.Name;
-        var isAdmin = authState.User.IsInRole("Administrator");
+        await LoadUserData();
+        await LoadEventData();
+    }
 
-        context = DbFactory.CreateDbContext();
-        selectedEvent = await context.Event
-            .AsNoTracking()
-            .FirstOrDefaultAsync(e => e.Id == EventId);
-
-        if (selectedEvent is null)
+    private async Task LoadUserData()
+    {
+        try
         {
-            NavigationManager.NavigateTo("/events");
-            return;
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity?.IsAuthenticated == true)
+            {
+                currentUserEmail = user.Identity.Name ?? "";
+            }
         }
-
-        // ✅ Check authorization: Admin OR Event Creator
-        if (!isAdmin && selectedEvent.CreatedBy != currentUserEmail)
+        catch (Exception ex)
         {
-            isUnauthorized = true;
+            Console.WriteLine($"Error loading user: {ex.Message}");
         }
     }
 
-    private IQueryable<Payment> GetEventPayments()
+    private async Task LoadEventData()
     {
-        var registrationIds = context.Registration
-            .Where(r => r.EventId == EventId)
-            .Select(r => r.Id);
+        isLoading = true;
 
-        return context.Payment
-            .Where(p => registrationIds.Contains(p.RegistrationId))
-            .OrderByDescending(p => p.PaymentDate);
+        try
+        {
+            // Load event
+            eventData = await DbContext.Event
+                .Include(e => e.Tickets)
+                .FirstOrDefaultAsync(e => e.Id == EventId);
+
+            if (eventData == null || eventData.CreatedBy != currentUserEmail)
+            {
+                isLoading = false;
+                return;
+            }
+
+            // Load all registrations for this event
+            registrations = await DbContext.Registration
+                .Include(r => r.Ticket)
+                .Where(r => r.EventId == EventId)
+                .OrderByDescending(r => r.RegistrationDate)
+                .ToListAsync();
+
+            // Apply initial filter
+            SetFilter("all");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading data: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
-    public async ValueTask DisposeAsync()
+    private void SetFilter(string filter)
     {
-        if (context != null)
+        currentFilter = filter;
+
+        filteredRegistrations = filter switch
         {
-            await context.DisposeAsync();
+            "paid" => registrations.Where(r => r.PaymentStatus == "Paid").ToList(),
+            "unpaid" => registrations.Where(r => r.PaymentStatus != "Paid").ToList(),
+            _ => registrations.ToList()
+        };
+
+        StateHasChanged();
+    }
+
+    private async Task ExportToCSV()
+    {
+        try
+        {
+            var csv = new System.Text.StringBuilder();
+
+            // Headers
+            csv.AppendLine("Registration Date,Name,Email,Ticket Type,Quantity,Amount,Payment Status,Payment Date,Transaction ID");
+
+            // Data rows
+            foreach (var reg in filteredRegistrations)
+            {
+                csv.AppendLine($"{reg.RegistrationDate:yyyy-MM-dd}," +
+                              $"\"{reg.FullName}\"," +
+                              $"\"{reg.Email}\"," +
+                              $"\"{reg.Ticket?.Type ?? "N/A"}\"," +
+                              $"{reg.Quantity}," +
+                              $"{reg.TotalAmount:F2}," +
+                              $"{reg.PaymentStatus}," +
+                              $"{(reg.PaymentDate.HasValue ? reg.PaymentDate.Value.ToString("yyyy-MM-dd") : "")}," +
+                              $"{reg.TransactionId ?? ""}");
+            }
+
+            // Download
+            var fileName = $"{eventData?.Title?.Replace(" ", "_")}_Payments_{DateTime.Now:yyyyMMdd}.csv";
+            var bytes = System.Text.Encoding.UTF8.GetBytes(csv.ToString());
+            var base64 = Convert.ToBase64String(bytes);
+
+            await JSRuntime.InvokeVoidAsync("downloadFile", fileName, base64);
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Export error: {ex.Message}");
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/events");
     }
 }

@@ -78,12 +78,26 @@
             </div>
 
             <div class="reg-success-actions">
-                <button class="reg-success-btn-primary" @onclick="GoToExploreEvents">
-                    Explore More Events
-                </button>
-                <button class="reg-success-btn-secondary" @onclick="GoHome">
-                    Back to Home
-                </button>
+                @if (savedRegistrationId.HasValue && totalPrice > 0)
+                {
+                    <!-- Show Pay Now button for paid events -->
+                    <button class="reg-success-btn-primary" @onclick="@(() => GoToPayment())">
+                        💳 Complete Payment ($@totalPrice.ToString("F2"))
+                    </button>
+                    <button class="reg-success-btn-secondary" @onclick="@(() => GoToDashboard())">
+                        Pay Later (View Dashboard)
+                    </button>
+                }
+                else
+                {
+                    <!-- Free events - no payment needed -->
+                    <button class="reg-success-btn-primary" @onclick="@(() => GoToDashboard())">
+                        View My Registration
+                    </button>
+                    <button class="reg-success-btn-secondary" @onclick="@(() => GoToExploreEvents())">
+                        Explore More Events
+                    </button>
+                }
             </div>
         </div>
     }
@@ -260,6 +274,7 @@
     private string errorMessage = "";
     private int quantity = 1;
     private decimal totalPrice => selectedTicket != null ? selectedTicket.Price * quantity : 0;
+    private int? savedRegistrationId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -325,7 +340,6 @@
 
         try
         {
-            // Create registration record
             var registration = new EventRegistration.Domain.Registration
             {
                 EventId = eventData.Id,
@@ -344,6 +358,7 @@
             DbContext.Registration.Add(registration);
             await DbContext.SaveChangesAsync();
 
+            savedRegistrationId = registration.Id; 
             registrationComplete = true;
         }
         catch (Exception ex)
@@ -357,16 +372,19 @@
         }
     }
 
-    private void GoBack()
+    // Add navigation methods:
+    private void GoToPayment()
     {
-        if (EventId.HasValue)
+        if (savedRegistrationId.HasValue)
         {
-            Navigation.NavigateTo($"/event-details/{EventId.Value}");
+            Navigation.NavigateTo($"/user/dashboard"); // For now, go to dashboard
+                                                       // OR create a dedicated payment page: Navigation.NavigateTo($"/payment/{savedRegistrationId.Value}");
         }
-        else
-        {
-            Navigation.NavigateTo("/explore-events");
-        }
+    }
+
+    private void GoToDashboard()
+    {
+        Navigation.NavigateTo("/user/dashboard");
     }
 
     private void GoToExploreEvents()
@@ -379,6 +397,17 @@
         Navigation.NavigateTo("/");
     }
 
+    private void GoBack()
+    {
+        if (EventId.HasValue)
+        {
+            Navigation.NavigateTo($"/event-details/{EventId.Value}");
+        }
+        else
+        {
+            Navigation.NavigateTo("/explore-events");
+        }
+    }
     // Registration form data model
     public class RegistrationFormData
     {
