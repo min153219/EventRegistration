@@ -284,6 +284,7 @@
     z-index: 1001;
     padding: 20px;
     animation: fadeIn 0.3s ease;
+    pointer-events: none;
 }
 
 @keyframes fadeIn {
@@ -305,6 +306,7 @@
     max-height: 90vh;
     overflow-y: auto;
     animation: slideUp 0.3s ease;
+    pointer-events: auto;
 }
 
 @keyframes slideUp {
