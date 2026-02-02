@@ -4,37 +4,65 @@
 @inject IDbContextFactory<EventRegistration.Data.EventRegistrationContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Details</PageTitle>
+<PageTitle>Ticket Details</PageTitle>
 
-<h1>Details</h1>
+<div class="page-container">
+    <div class="page-header">
+        <h1>Ticket Details</h1>
+    </div>
 
-<div>
-    <h2>Ticket</h2>
-    <hr />
     @if (ticket is null)
     {
-        <p><em>Loading...</em></p>
+        <div class="loading-container">
+            <p class="loading-text">Loading...</p>
+        </div>
     }
-    else {
-        <dl class="row">
-            <dt class="col-sm-2">Price</dt>
-            <dd class="col-sm-10">@ticket.Price</dd>
-            <dt class="col-sm-2">Type</dt>
-            <dd class="col-sm-10">@ticket.Type</dd>
-            <dt class="col-sm-2">EventId</dt>
-            <dd class="col-sm-10">@ticket.EventId</dd>
-            <dt class="col-sm-2">DateCreated</dt>
-            <dd class="col-sm-10">@ticket.DateCreated</dd>
-            <dt class="col-sm-2">DateUpdated</dt>
-            <dd class="col-sm-10">@ticket.DateUpdated</dd>
-            <dt class="col-sm-2">CreatedBy</dt>
-            <dd class="col-sm-10">@ticket.CreatedBy</dd>
-            <dt class="col-sm-2">UpdatedBy</dt>
-            <dd class="col-sm-10">@ticket.UpdatedBy</dd>
-        </dl>
-        <div>
-            <a href="@($"/tickets/edit?id={ticket.Id}")">Edit</a> |
-            <a href="@($"/events/{ticket.EventId}/tickets")">Back To List</a>
+    else
+    {
+        <div class="ticket-details-container">
+            <h2 class="section-title">Ticket Information</h2>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Price</span>
+                    <span class="detail-value">@ticket.Price</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Type</span>
+                    <span class="detail-value">@ticket.Type</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Event ID</span>
+                    <span class="detail-value">@ticket.EventId</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Date Created</span>
+                    <span class="detail-value">@ticket.DateCreated</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Date Updated</span>
+                    <span class="detail-value">@ticket.DateUpdated</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Created By</span>
+                    <span class="detail-value">@ticket.CreatedBy</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Updated By</span>
+                    <span class="detail-value">@ticket.UpdatedBy</span>
+                </div>
+            </div>
+
+            <div class="actions">
+                <a href="@($"/tickets/edit?id={ticket.Id}")" class="btn btn-primary">Edit Ticket</a>
+                <a href="@($"/events/{ticket.EventId}/tickets")" class="btn btn-secondary">Back to List</a>
+            </div>
         </div>
     }
 </div>

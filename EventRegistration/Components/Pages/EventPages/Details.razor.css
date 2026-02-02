@@ -1,0 +1,403 @@
+﻿/* ============================================================
+   CONTAINER
+   ============================================================ */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f5f7fa;
+    min-height: 100vh;
+}
+
+/* ============================================================
+   LOADING SPINNER
+   ============================================================ */
+.loading-center {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e0e0e0;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 16px auto;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-center p {
+    color: #666;
+    font-size: 15px;
+    margin: 0;
+}
+
+/* ============================================================
+   TOP SECTION — title + buttons
+   ============================================================ */
+.details-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.details-top-left h1 {
+    font-size: 30px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 10px 0;
+}
+
+.details-top-right {
+    display: flex;
+    gap: 10px;
+}
+
+/* ============================================================
+   TWO-COLUMN LAYOUT
+   ============================================================ */
+.details-layout {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+}
+
+.details-main {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.details-sidebar {
+    flex: 0 0 340px;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.details-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.details-card-header {
+    padding: 16px 24px;
+}
+
+    .details-card-header h5 {
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+.details-card-body {
+    padding: 24px;
+}
+
+/* CARD HEADER COLORS */
+.header-blue {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+}
+
+.header-green {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+}
+
+.header-gray {
+    background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+}
+
+.header-yellow {
+    background: linear-gradient(135deg, #ffc107 0%, #e6ac00 100%);
+}
+
+    .header-yellow h5 {
+        color: #333;
+    }
+
+/* ============================================================
+   INFO GRID — Event Information fields
+   ============================================================ */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.info-item strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 4px;
+}
+
+.info-item p {
+    font-size: 14px;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.info-item-full {
+    grid-column: 1 / -1;
+}
+
+.description-text {
+    color: #666 !important;
+}
+
+/* ============================================================
+   QUICK ACTIONS
+   ============================================================ */
+.quick-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* ============================================================
+   AUDIT ROWS
+   ============================================================ */
+.audit-row {
+    margin-bottom: 18px;
+}
+
+    .audit-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .audit-row strong {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 3px;
+    }
+
+    .audit-row p {
+        font-size: 14px;
+        color: #6c757d;
+        margin: 0;
+    }
+
+.not-updated-text {
+    font-size: 13px;
+    color: #6c757d;
+    font-style: italic;
+    margin: 0;
+}
+
+/* ============================================================
+   STATUS CARD CENTER
+   ============================================================ */
+.status-center {
+    text-align: center;
+}
+
+.status-description {
+    font-size: 13px;
+    color: #6c757d;
+    margin: 14px 0 0 0;
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+.badge {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    line-height: 1.4;
+}
+
+.badge-large {
+    font-size: 18px;
+    padding: 10px 24px;
+}
+
+.badge-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.badge-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge-approved {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.badge-rejected {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.badge-default {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+    }
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #6a428e 100%);
+    }
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+
+/* OUTLINE BUTTONS */
+.btn-outline {
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.btn-outline-green {
+    color: #28a745;
+    border: 2px solid #28a745;
+}
+
+    .btn-outline-green:hover {
+        background-color: #28a745;
+        color: white;
+    }
+
+.btn-outline-blue {
+    color: #17a2b8;
+    border: 2px solid #17a2b8;
+}
+
+    .btn-outline-blue:hover {
+        background-color: #17a2b8;
+        color: white;
+    }
+
+.btn-outline-purple {
+    color: #667eea;
+    border: 2px solid #667eea;
+}
+
+    .btn-outline-purple:hover {
+        background-color: #667eea;
+        color: white;
+    }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 992px) {
+    .details-sidebar {
+        flex: 1;
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 20px 15px;
+    }
+
+    .details-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-item-full {
+        grid-column: 1;
+    }
+
+    .quick-actions {
+        flex-direction: column;
+    }
+
+    .btn-outline {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .details-top-left h1 {
+        font-size: 24px;
+    }
+
+    .details-top-right {
+        flex-direction: column;
+        width: 100%;
+    }
+
+        .details-top-right .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+    .details-card-body {
+        padding: 18px 16px;
+    }
+}
+

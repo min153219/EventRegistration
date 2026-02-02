@@ -196,8 +196,6 @@
                         Building innovative solutions to make event management seamless.
                     </p>
                 </div>
-
-               
             </div>
         </div>
     </section>
@@ -205,35 +203,12 @@
     <!-- CTA Section -->
     <section class="about-section cta-section">
         <div class="container">
-            <div class="cta-box">
+            <div class="cta-content">
                 <h2 class="cta-title">Ready to Discover Amazing Events?</h2>
                 <p class="cta-description">
                     Join thousands of people who trust Eventora for their event experiences
                 </p>
-                <div class="cta-buttons">
-                    <button class="btn-primary" @onclick="GoToExploreEvents">
-                        Explore Events
-                    </button>
-                    <button class="btn-secondary" @onclick="GoToCreateEvent">
-                        Create an Event
-                    </button>
-                </div>
             </div>
         </div>
     </section>
 </div>
-
-@code {
-    [Inject]
-    private NavigationManager? Navigation { get; set; }
-
-    private void GoToExploreEvents()
-    {
-        Navigation?.NavigateTo("/explore-events");
-    }
-
-    private void GoToCreateEvent()
-    {
-        Navigation?.NavigateTo("/Events/Create");
-    }
-}

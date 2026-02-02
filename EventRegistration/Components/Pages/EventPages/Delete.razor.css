@@ -1,0 +1,390 @@
+﻿/* ============================================================
+   CONTAINER
+   ============================================================ */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: #f5f7fa;
+    min-height: 100vh;
+}
+
+/* ============================================================
+   TOP WARNING BANNER
+   ============================================================ */
+.delete-warning-banner {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+}
+
+    .delete-warning-banner h4 {
+        font-size: 17px;
+        font-weight: 700;
+        margin: 0;
+        color: #856404;
+    }
+
+    .delete-warning-banner p {
+        font-size: 14px;
+        margin: 0;
+        color: #856404;
+        line-height: 1.5;
+    }
+
+/* ============================================================
+   ACCESS DENIED CARD
+   ============================================================ */
+.access-denied-card {
+    background: white;
+    border: 1px solid #f5c6cb;
+    border-radius: 12px;
+    padding: 28px 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+    .access-denied-card h4 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #721c24;
+        margin: 0 0 10px 0;
+    }
+
+    .access-denied-card p {
+        font-size: 15px;
+        color: #721c24;
+        margin: 0 0 20px 0;
+        line-height: 1.6;
+    }
+
+/* ============================================================
+   LOADING SPINNER
+   ============================================================ */
+.loading-center {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e0e0e0;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 16px auto;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-center p {
+    color: #666;
+    font-size: 15px;
+    margin: 0;
+}
+
+/* ============================================================
+   TWO-COLUMN LAYOUT
+   ============================================================ */
+.delete-layout {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+}
+
+.delete-main {
+    flex: 1;
+    min-width: 300px;
+}
+
+.delete-sidebar {
+    flex: 0 0 340px;
+    min-width: 300px;
+}
+
+/* ============================================================
+   MAIN EVENT DETAIL CARD
+   ============================================================ */
+.delete-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.delete-card-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    padding: 16px 24px;
+}
+
+    .delete-card-header h5 {
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+.delete-card-body {
+    padding: 28px 24px;
+}
+
+/* ============================================================
+   DETAIL LIST
+   ============================================================ */
+.detail-list {
+    margin: 0;
+    padding: 0;
+}
+
+.detail-row {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid #f0f1f3;
+}
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+.detail-list dt {
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    margin: 0;
+    padding: 0;
+}
+
+.detail-list dd {
+    font-size: 14px;
+    color: #1a1a1a;
+    margin: 0;
+    padding: 0;
+    word-break: break-word;
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+.badge {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    line-height: 1.4;
+}
+
+.badge-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.badge-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.badge-approved {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.badge-rejected {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.badge-default {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+/* ============================================================
+   ACTION BUTTONS
+   ============================================================ */
+.delete-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+    }
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #6a428e 100%);
+    }
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+}
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #c82333 0%, #a71d2a 100%);
+    }
+
+    .btn-danger:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+
+/* ============================================================
+   SIDEBAR WARNING CARD
+   ============================================================ */
+.warning-card {
+    background: linear-gradient(135deg, #fffdf0 0%, #fff8dc 100%);
+    border: 1px solid #ffc107;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+    .warning-card h5 {
+        font-size: 17px;
+        font-weight: 700;
+        color: #856404;
+        margin: 0 0 14px 0;
+    }
+
+    .warning-card > p {
+        font-size: 14px;
+        color: #856404;
+        margin: 0 0 12px 0;
+        line-height: 1.5;
+    }
+
+    .warning-card ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #856404;
+        font-size: 14px;
+        line-height: 2;
+    }
+
+        .warning-card ul li {
+            margin-bottom: 2px;
+        }
+
+.warning-card-divider {
+    height: 1px;
+    background-color: #e6d89a;
+    margin: 18px 0;
+}
+
+.warning-card-footer {
+    font-size: 13px;
+    color: #a08040;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 992px) {
+    .delete-sidebar {
+        flex: 1;
+        min-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 20px 15px;
+    }
+
+    .delete-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .detail-row {
+        grid-template-columns: 130px 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .delete-warning-banner {
+        padding: 18px 16px;
+    }
+
+    .delete-card-body {
+        padding: 20px 16px;
+    }
+
+    .detail-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+        padding: 10px 0;
+    }
+
+    .detail-list dt {
+        color: #888;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .btn {
+        padding: 11px 20px;
+        font-size: 14px;
+    }
+
+    .warning-card {
+        padding: 20px;
+    }
+}

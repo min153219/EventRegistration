@@ -11,52 +11,70 @@
 
 <PageTitle>Event Tickets</PageTitle>
 
-@if (isUnauthorized)
-{
-    <div class="alert alert-danger">
-        <h4>Access Denied</h4>
-        <p>You don't have permission to view tickets for this event. Only the event creator can manage tickets.</p>
-        <a href="/events" class="btn btn-primary">Back to Events</a>
-    </div>
-}
-else if (selectedEvent is null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <h1>@selectedEvent.Title - Tickets</h1>
-    <div class="card mb-4">
-        <div class="card-body">
-            <dl class="row">
-                <dt class="col-sm-3">Event Date:</dt>
-                <dd class="col-sm-9">@selectedEvent.EventDate.ToString("dd/MM/yyyy")</dd>
-                <dt class="col-sm-3">Location:</dt>
-                <dd class="col-sm-9">@selectedEvent.Location</dd>
-                <dt class="col-sm-3">Total Capacity:</dt>
-                <dd class="col-sm-9">@selectedEvent.TotalCapacity</dd>
-            </dl>
+<div class="page-container">
+    @if (isUnauthorized)
+    {
+        <div class="alert alert-danger">
+            <h2 class="alert-title">Access Denied</h2>
+            <p class="alert-message">You don't have permission to view tickets for this event. Only the event creator can manage tickets.</p>
+            <a href="/events" class="btn btn-primary">Back to Events</a>
         </div>
-    </div>
-    <p>
-        <a href="@($"/events/{EventId}/tickets/create")">Create New Ticket</a>
-    </p>
-    <QuickGrid Class="table" Items="context.Ticket.Where(t => t.EventId == EventId)">
-        <PropertyColumn Property="ticket => ticket.Price" />
-        <PropertyColumn Property="ticket => ticket.Type" />
-        <PropertyColumn Property="ticket => ticket.DateCreated" />
-        <PropertyColumn Property="ticket => ticket.DateUpdated" />
-        <PropertyColumn Property="ticket => ticket.CreatedBy" />
-        <PropertyColumn Property="ticket => ticket.UpdatedBy" />
-        <TemplateColumn Context="ticket">
-            <a href="@($"/tickets/edit?id={ticket.Id}")">Edit</a> |
-            <a href="@($"/tickets/details?id={ticket.Id}")">Details</a> |
-            <a href="@($"/tickets/delete?id={ticket.Id}")">Delete</a>
-        </TemplateColumn>
-    </QuickGrid>
-}
-<div class="mt-3">
-    <a href="/events">Back to Events</a>
+    }
+    else if (selectedEvent is null)
+    {
+        <div class="loading-container">
+            <p class="loading-text">Loading...</p>
+        </div>
+    }
+    else
+    {
+        <div class="page-header">
+            <h1>@selectedEvent.Title - Tickets</h1>
+        </div>
+
+        <div class="event-info-card">
+            <div class="event-details">
+                <div class="detail-item">
+                    <span class="detail-label">Event Date:</span>
+                    <span class="detail-value">@selectedEvent.EventDate.ToString("dd/MM/yyyy")</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Location:</span>
+                    <span class="detail-value">@selectedEvent.Location</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Total Capacity:</span>
+                    <span class="detail-value">@selectedEvent.TotalCapacity</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <a href="@($"/events/{EventId}/tickets/create")" class="btn btn-primary">Create New Ticket</a>
+        </div>
+
+        <div class="tickets-table-container">
+            <QuickGrid Class="tickets-table" Items="context.Ticket.Where(t => t.EventId == EventId)">
+                <PropertyColumn Property="ticket => ticket.Price" />
+                <PropertyColumn Property="ticket => ticket.Type" />
+                <PropertyColumn Property="ticket => ticket.DateCreated" Title="Created" />
+                <PropertyColumn Property="ticket => ticket.DateUpdated" Title="Updated" />
+                <PropertyColumn Property="ticket => ticket.CreatedBy" Title="Created By" />
+                <PropertyColumn Property="ticket => ticket.UpdatedBy" Title="Updated By" />
+                <TemplateColumn Title="Actions" Context="ticket">
+                    <div class="action-buttons">
+                        <a href="@($"/tickets/edit?id={ticket.Id}")" class="btn btn-primary">Edit</a>
+                        <a href="@($"/tickets/details?id={ticket.Id}")" class="btn btn-secondary">Details</a>
+                        <a href="@($"/tickets/delete?id={ticket.Id}")" class="btn btn-danger">Delete</a>
+                    </div>
+                </TemplateColumn>
+            </QuickGrid>
+        </div>
+
+        <div class="back-link">
+            <a href="/events">← Back to Events</a>
+        </div>
+    }
 </div>
 
 @code {

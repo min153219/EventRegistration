@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContextFactory<EventRegistrationContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("EventRegistrationContext") ?? throw new InvalidOperationException("Connection string 'EventRegistrationContext' not found.")));
-
+builder.Services.AddControllers();
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -60,6 +60,7 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.MapAdditionalIdentityEndpoints();;
+app.MapAdditionalIdentityEndpoints();
+app.MapControllers();
 
 app.Run();

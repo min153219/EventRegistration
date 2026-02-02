@@ -4,40 +4,73 @@
 @inject IDbContextFactory<EventRegistration.Data.EventRegistrationContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Delete</PageTitle>
+<PageTitle>Delete Ticket</PageTitle>
 
-<h1>Delete</h1>
+<div class="page-container">
+    <div class="page-header">
+        <h1>Delete Ticket</h1>
+        <p class="warning-text">Are you sure you want to delete this ticket?</p>
+    </div>
 
-<p>Are you sure you want to delete this?</p>
-<div>
-    <h2>Ticket</h2>
-    <hr />
     @if (selectedTicket is null)
     {
-        <p><em>Loading...</em></p>
+        <div class="loading-container">
+            <p class="loading-text">Loading...</p>
+        </div>
     }
     else
     {
-        <dl class="row">
-            <dt class="col-sm-2">Price</dt>
-            <dd class="col-sm-10">@selectedTicket.Price</dd>
-            <dt class="col-sm-2">Type</dt>
-            <dd class="col-sm-10">@selectedTicket.Type</dd>
-            <dt class="col-sm-2">EventId</dt>
-            <dd class="col-sm-10">@selectedTicket.EventId</dd>
-            <dt class="col-sm-2">DateCreated</dt>
-            <dd class="col-sm-10">@selectedTicket.DateCreated</dd>
-            <dt class="col-sm-2">DateUpdated</dt>
-            <dd class="col-sm-10">@selectedTicket.DateUpdated</dd>
-            <dt class="col-sm-2">CreatedBy</dt>
-            <dd class="col-sm-10">@selectedTicket.CreatedBy</dd>
-            <dt class="col-sm-2">UpdatedBy</dt>
-            <dd class="col-sm-10">@selectedTicket.UpdatedBy</dd>
-        </dl>
-        <EditForm method="post" Model="selectedTicket" OnValidSubmit="DeleteTicket" FormName="delete" Enhance>
-            <button type="submit" class="btn btn-danger" disabled="@(selectedTicket is null)">Delete</button> |
-            <a href="@($"/events/{selectedTicket.EventId}/tickets")">Back to List</a>
-        </EditForm>
+        <div class="ticket-details-container">
+            <h2 class="section-title">Ticket Details</h2>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Price</span>
+                    <span class="detail-value">@selectedTicket.Price</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Type</span>
+                    <span class="detail-value">@selectedTicket.Type</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Event ID</span>
+                    <span class="detail-value">@selectedTicket.EventId</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Date Created</span>
+                    <span class="detail-value">@selectedTicket.DateCreated</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Date Updated</span>
+                    <span class="detail-value">@selectedTicket.DateUpdated</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Created By</span>
+                    <span class="detail-value">@selectedTicket.CreatedBy</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Updated By</span>
+                    <span class="detail-value">@selectedTicket.UpdatedBy</span>
+                </div>
+            </div>
+
+            <EditForm method="post" Model="selectedTicket" OnValidSubmit="DeleteTicket" FormName="delete" Enhance>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-danger" disabled="@(selectedTicket is null)">Delete Ticket</button>
+                    <a href="@($"/events/{selectedTicket.EventId}/tickets")" class="btn btn-secondary">Cancel</a>
+                </div>
+            </EditForm>
+        </div>
+
+        <div class="back-link">
+            <a href="@($"/events/{selectedTicket.EventId}/tickets")">← Back to Ticket List</a>
+        </div>
     }
 </div>
 
