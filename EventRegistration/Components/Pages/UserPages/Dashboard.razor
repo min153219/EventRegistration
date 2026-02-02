@@ -273,9 +273,7 @@
                             </div>
 
                             <div class="card-actions">
-                                <button class="btn-info" @onclick="@(() => ViewAttendees(evt.Id))">
-                                    👥 Attendees
-                                </button>
+                               
                                 <button class="btn-secondary" @onclick="@(() => EditEvent(evt.Id))">
                                     ✏️ Edit
                                 </button>
@@ -497,10 +495,7 @@
         Navigation.NavigateTo("/Events/Create");
     }
 
-    private void ViewAttendees(int eventId)
-    {
-        Navigation.NavigateTo($"/events/attendees/{eventId}");
-    }
+    
 
     private void EditEvent(int eventId)
     {
