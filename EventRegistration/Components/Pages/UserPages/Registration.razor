@@ -4,8 +4,10 @@
 @using EventRegistration.Domain
 @using Microsoft.EntityFrameworkCore
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Authorization
 @inject EventRegistrationContext DbContext
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Register for Event - Eventora</PageTitle>
 
@@ -278,6 +280,19 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // CHECK AUTHENTICATION FIRST
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            // Not logged in - redirect to login with return URL
+            var returnUrl = $"/register?eventId={EventId}&ticketId={TicketId}";
+            Navigation.NavigateTo($"/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}");
+            return;
+        }
+
+        // If authenticated, continue loading
         await LoadEventData();
     }
 
@@ -358,7 +373,7 @@
             DbContext.Registration.Add(registration);
             await DbContext.SaveChangesAsync();
 
-            savedRegistrationId = registration.Id; 
+            savedRegistrationId = registration.Id;
             registrationComplete = true;
         }
         catch (Exception ex)
@@ -377,8 +392,8 @@
     {
         if (savedRegistrationId.HasValue)
         {
-            Navigation.NavigateTo($"/user/dashboard"); // For now, go to dashboard
-                                                       // OR create a dedicated payment page: Navigation.NavigateTo($"/payment/{savedRegistrationId.Value}");
+            Navigation.NavigateTo($"/payment/{savedRegistrationId.Value}");
+
         }
     }
 

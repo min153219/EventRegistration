@@ -1,0 +1,113 @@
+﻿@page "/payment-success/{registrationId:int}"
+@rendermode InteractiveServer
+@using EventRegistration.Data
+@using EventRegistration.Domain
+@using Microsoft.EntityFrameworkCore
+@inject EventRegistrationContext DbContext
+@inject NavigationManager Navigation
+
+<PageTitle>Payment Successful - Eventora</PageTitle>
+
+<link href="/PaymentSuccess.css" rel="stylesheet" />
+
+<div class="success-page">
+    @if (isLoading)
+    {
+        <p>Loading...</p>
+    }
+    else if (registration == null)
+    {
+        <div class="success-icon error-icon">❌</div>
+        <h1 class="success-title">Not Found</h1>
+        <p class="success-message">Registration not found.</p>
+        <button class="btn btn-primary" @onclick="GoToDashboard">Go to Dashboard</button>
+    }
+    else
+    {
+        <div class="success-icon">✓</div>
+        <h1 class="success-title">Payment Successful!</h1>
+        <p class="success-message">Your payment has been processed successfully.</p>
+
+        <div class="details-card">
+            <div class="details-row">
+                <span class="details-label">Event:</span>
+                <span class="details-value">@registration.Event?.Title</span>
+            </div>
+            <div class="details-row">
+                <span class="details-label">Date:</span>
+                <span class="details-value">@registration.Event?.EventDate.ToString("MMM dd, yyyy")</span>
+            </div>
+            <div class="details-row">
+                <span class="details-label">Ticket:</span>
+                <span class="details-value">@(registration.Ticket?.Type ?? "Standard") x @registration.Quantity</span>
+            </div>
+            <div class="details-row">
+                <span class="details-label">Amount Paid:</span>
+                <span class="details-value">$@registration.TotalAmount.ToString("F2")</span>
+            </div>
+            <div class="details-row">
+                <span class="details-label">Transaction ID:</span>
+                <span class="details-value">@registration.TransactionId</span>
+            </div>
+            <div class="details-row">
+                <span class="details-label">Payment Date:</span>
+                <span class="details-value">@registration.PaymentDate?.ToString("MMM dd, yyyy h:mm tt")</span>
+            </div>
+        </div>
+
+        <p class="email-confirmation">
+            A confirmation email has been sent to <strong>@registration.Email</strong>
+        </p>
+
+        <div class="button-group">
+            <button class="btn btn-primary" @onclick="GoToDashboard">
+                View Dashboard
+            </button>
+            <button class="btn btn-secondary" @onclick="GoToExploreEvents">
+                Explore More Events
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int RegistrationId { get; set; }
+
+    private Registration? registration;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            registration = await DbContext.Registration
+                .Include(r => r.Event)
+                .Include(r => r.Ticket)
+                .FirstOrDefaultAsync(r => r.Id == RegistrationId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GoToDashboard()
+    {
+        Navigation.NavigateTo("/user/dashboard");
+    }
+
+    private void GoToExploreEvents()
+    {
+        Navigation.NavigateTo("/explore-events");
+    }
+}

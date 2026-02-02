@@ -1,0 +1,340 @@
+﻿@page "/payment/{registrationId:int}"
+@rendermode InteractiveServer
+@using EventRegistration.Data
+@using EventRegistration.Domain
+@using Microsoft.EntityFrameworkCore
+@using System.ComponentModel.DataAnnotations
+@inject EventRegistrationContext DbContext
+@inject NavigationManager Navigation
+
+<PageTitle>Complete Payment - Eventora</PageTitle>
+
+<link href="/PaymentForm.css" rel="stylesheet" />
+
+<div class="payment-page">
+    @if (isLoading)
+    {
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Loading payment details...</p>
+        </div>
+    }
+    else if (registration == null || eventData == null)
+    {
+        <div class="error-container">
+            <div class="error-icon">⚠️</div>
+            <h2>Registration Not Found</h2>
+            <p>We couldn't find your registration.</p>
+            <button class="btn-back" @onclick="GoToDashboard">Back to Dashboard</button>
+        </div>
+    }
+    else if (registration.PaymentStatus == "Paid")
+    {
+        <div class="success-container">
+            <div class="success-icon">✅</div>
+            <h2>Payment Already Completed</h2>
+            <p>This registration has already been paid.</p>
+            <button class="btn-primary" @onclick="GoToDashboard">View Dashboard</button>
+        </div>
+    }
+    else if (isProcessing)
+    {
+        <!-- Processing State -->
+        <div class="processing-container">
+            <div class="processing-spinner"></div>
+            <h2 class="processing-title">Processing Payment...</h2>
+            <p class="processing-message">Please wait while we process your payment</p>
+            <div class="processing-dots">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Payment Form -->
+        <div class="payment-container">
+            <!-- Progress Header -->
+            <div class="payment-progress">
+                <div class="progress-step completed">
+                    <div class="progress-number">✓</div>
+                    <span>Registration</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step active">
+                    <div class="progress-number">2</div>
+                    <span>Payment</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="progress-number">3</div>
+                    <span>Confirmation</span>
+                </div>
+            </div>
+
+            <h1 class="payment-title">Complete Your Payment</h1>
+
+            <div class="payment-grid">
+                <!-- Left Column: Order Summary -->
+                <div class="order-summary">
+                    <h2 class="section-title">Order Summary</h2>
+
+                    <div class="summary-card">
+                        <div class="event-info">
+                            <span class="event-category">@eventData.Category</span>
+                            <h3 class="event-title">@eventData.Title</h3>
+                        </div>
+
+                        <div class="summary-details">
+                            <div class="summary-row">
+                                <span class="summary-label">📅 Date:</span>
+                                <span>@eventData.EventDate.ToString("MMM dd, yyyy")</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">📍 Location:</span>
+                                <span>@eventData.Location</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">🎫 Ticket:</span>
+                                <span>@(registration.Ticket?.Type ?? "Standard") x @registration.Quantity</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">👤 Name:</span>
+                                <span>@registration.FullName</span>
+                            </div>
+                        </div>
+
+                        <div class="price-breakdown">
+                            <div class="price-row">
+                                <span>Subtotal</span>
+                                <span>$@registration.TotalAmount.ToString("F2")</span>
+                            </div>
+                            <div class="price-row total">
+                                <span>Total Amount</span>
+                                <span class="total-price">$@registration.TotalAmount.ToString("F2")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Payment Form -->
+                <div class="payment-form-column">
+                    <h2 class="section-title">Payment Details</h2>
+
+                    <div class="form-card">
+                        <EditForm Model="@paymentData" OnValidSubmit="@ProcessPayment">
+                            <DataAnnotationsValidator />
+
+                            <div class="form-group">
+                                <label class="form-label">Card Number *</label>
+                                <InputText class="form-input" @bind-Value="paymentData.CardNumber"
+                                           placeholder="1234 5678 9012 3456" maxlength="19" />
+                                <ValidationMessage For="@(() => paymentData.CardNumber)" class="error-message" />
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Expiry Date *</label>
+                                    <InputText class="form-input" @bind-Value="paymentData.ExpiryDate"
+                                               placeholder="MM/YY" maxlength="5" />
+                                    <ValidationMessage For="@(() => paymentData.ExpiryDate)" class="error-message" />
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">CVV *</label>
+                                    <InputText class="form-input" @bind-Value="paymentData.CVV"
+                                               placeholder="123" maxlength="4" type="password" />
+                                    <ValidationMessage For="@(() => paymentData.CVV)" class="error-message" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Cardholder Name *</label>
+                                <InputText class="form-input" @bind-Value="paymentData.CardholderName"
+                                           placeholder="Name on card" />
+                                <ValidationMessage For="@(() => paymentData.CardholderName)" class="error-message" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Payment Method *</label>
+                                <InputSelect class="form-input" @bind-Value="paymentData.PaymentMethod">
+                                    <option value="">Select payment method</option>
+                                    <option value="Credit Card">Credit Card</option>
+                                    <option value="Debit Card">Debit Card</option>
+                                    <option value="PayPal">PayPal</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => paymentData.PaymentMethod)" class="error-message" />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Currency *</label>
+                                <InputSelect class="form-input" @bind-Value="paymentData.Currency">
+                                    <option value="USD">USD - US Dollar</option>
+                                    <option value="SGD">SGD - Singapore Dollar</option>
+                                    <option value="EUR">EUR - Euro</option>
+                                    <option value="GBP">GBP - British Pound</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => paymentData.Currency)" class="error-message" />
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(errorMessage))
+                            {
+                                <div class="alert-error">
+                                    <span>⚠️</span>
+                                    <span>@errorMessage</span>
+                                </div>
+                            }
+
+                            <div class="security-note">
+                                <span class="security-icon">🔒</span>
+                                <span>Your payment information is secure and encrypted</span>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn-secondary" @onclick="GoToDashboard">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="btn-primary" disabled="@isProcessing">
+                                    @if (isProcessing)
+                                    {
+                                        <span>Processing...</span>
+                                    }
+                                    else
+                                    {
+                                        <span>🔒 Pay $@registration.TotalAmount.ToString("F2")</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int RegistrationId { get; set; }
+
+    private Registration? registration;
+    private Event? eventData;
+    private PaymentFormData paymentData = new();
+
+    private bool isLoading = true;
+    private bool isProcessing = false;
+    private string errorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+
+        try
+        {
+            // Load registration with related data
+            registration = await DbContext.Registration
+                .Include(r => r.Event)
+                .Include(r => r.Ticket)
+                .FirstOrDefaultAsync(r => r.Id == RegistrationId);
+
+            if (registration != null)
+            {
+                eventData = registration.Event;
+
+                // Pre-fill cardholder name with registration name
+                paymentData.CardholderName = registration.FullName;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading data: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ProcessPayment()
+    {
+        if (registration == null) return;
+
+        isProcessing = true;
+        errorMessage = "";
+
+        try
+        {
+            // Simulate payment processing delay (2.5 seconds)
+            await Task.Delay(2500);
+
+            // Create Payment record in Payment table
+            var payment = new Payment
+            {
+                RegistrationId = registration.Id,
+                Amount = registration.TotalAmount,
+                PaymentMethod = paymentData.PaymentMethod,
+                Currency = paymentData.Currency,
+                PaymentDate = DateTime.Now,
+                DateCreated = DateTime.Now,
+                CreatedBy = registration.Email
+            };
+
+            DbContext.Payment.Add(payment);
+
+            // Update Registration status
+            registration.PaymentStatus = "Paid";
+            registration.PaymentDate = DateTime.Now;
+            registration.TransactionId = $"TXN{DateTime.Now.Ticks.ToString().Substring(8)}";
+            registration.Status = "Confirmed";
+            registration.DateUpdated = DateTime.Now;
+
+            await DbContext.SaveChangesAsync();
+
+            // Redirect to success page
+            Navigation.NavigateTo($"/payment-success/{RegistrationId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Payment error: {ex.Message}");
+            errorMessage = "Payment processing failed. Please try again.";
+            isProcessing = false;
+        }
+    }
+
+    private void GoToDashboard()
+    {
+        Navigation.NavigateTo("/user/dashboard");
+    }
+
+    // Payment form data model
+    public class PaymentFormData
+    {
+        [Required(ErrorMessage = "Card number is required")]
+        [RegularExpression(@"^[\d\s]{13,19}$", ErrorMessage = "Invalid card number")]
+        public string CardNumber { get; set; } = "";
+
+        [Required(ErrorMessage = "Expiry date is required")]
+        [RegularExpression(@"^(0[1-9]|1[0-2])\/\d{2}$", ErrorMessage = "Format: MM/YY")]
+        public string ExpiryDate { get; set; } = "";
+
+        [Required(ErrorMessage = "CVV is required")]
+        [RegularExpression(@"^\d{3,4}$", ErrorMessage = "Invalid CVV")]
+        public string CVV { get; set; } = "";
+
+        [Required(ErrorMessage = "Cardholder name is required")]
+        [StringLength(100)]
+        public string CardholderName { get; set; } = "";
+
+        [Required(ErrorMessage = "Payment method is required")]
+        public string PaymentMethod { get; set; } = "";
+
+        [Required(ErrorMessage = "Currency is required")]
+        public string Currency { get; set; } = "USD";
+    }
+}
